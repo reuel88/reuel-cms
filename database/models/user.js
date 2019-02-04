@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const user = sequelize.define('user', {
     email: DataTypes.STRING,
     password: DataTypes.STRING,
+    active: DataTypes.BOOLEAN,
   }, {});
   user.associate = function(models) {
       user.hasOne(models.profile, {
