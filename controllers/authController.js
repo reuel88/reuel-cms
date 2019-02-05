@@ -2,6 +2,19 @@ const userModal = require('../models').user;
 const jwt = require('jsonwebtoken');
 const constants = require('../config/constants');
 
+function getToken(headers) {
+    if (headers && headers.authorization) {
+        const parted = headers.authorization.split(' ');
+        if (parted.length === 2) {
+            return parted[1];
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
+}
+
 module.exports = {
     register(req, res) {
         if (!req.body.email || !req.body.password) {
@@ -39,5 +52,12 @@ module.exports = {
                 });
             })
             .catch(error => res.status(400).send(error));
+    },
+    authenticateToken(req,res , next){
+        const token = getToken(req.headers);
+        if(!token){
+            return res.status(403).send({success: false, message: 'Unauthorized.'});
+        }
+        next();
     }
 };
