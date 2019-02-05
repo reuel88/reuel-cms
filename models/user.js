@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 'active'
         },
+
         lastLogin: DataTypes.DATE,
     }, {});
 
@@ -47,5 +48,6 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'userId'
         })
     };
+
     return user;
 };

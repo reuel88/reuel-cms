@@ -18,11 +18,13 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         }
     }, {});
+
     userSetting.associate = function (models) {
         // associations can be defined here
         userSetting.belongsTo(models.user, {
             foreignKey: 'userId',
         })
     };
+
     return userSetting;
 };
