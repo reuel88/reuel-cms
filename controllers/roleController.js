@@ -1,5 +1,5 @@
-const RoleModel = require('../database/models').role;
-const UserModel = require('../database/models').user;
+const RoleModel = require('../models').role;
+const UserModel = require('../models').user;
 
 module.exports = {
     // Get

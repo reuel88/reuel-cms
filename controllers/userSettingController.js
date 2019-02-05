@@ -1,5 +1,5 @@
-const userSettingModel = require('../database/models').userSetting;
-const userModel = require('../database/models').user;
+const userSettingModel = require('../models').userSetting;
+const userModel = require('../models').user;
 
 module.exports = {
     list(req, res) {

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 
+const authController = require('../controllers/authController');
 const profileController = require('../controllers/profileController');
 const roleController = require('../controllers/roleController');
 const userController = require('../controllers/userController');
@@ -38,5 +40,8 @@ router.get('/api/v1/user-setting/:id', userSettingController.getById);
 router.post('/api/v1/user-setting/', userSettingController.add);
 router.put('/api/v1/user-setting/:id', userSettingController.update);
 router.delete('/api/v1/user-setting/:id', userSettingController.delete);
+
+/* User */
+router.post('/register', authController.register);
 
 module.exports = router;

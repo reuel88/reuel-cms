@@ -1,7 +1,7 @@
-const userModal = require('../database/models').user;
-const profileModel = require('../database/models').profile;
-const roleModel = require('../database/models').role;
-const userSettingsModel = require('../database/models').userSetting;
+const userModal = require('../models').user;
+const profileModel = require('../models').profile;
+const roleModel = require('../models').role;
+const userSettingsModel = require('../models').userSetting;
 
 module.exports = {
     list(req, res) {
