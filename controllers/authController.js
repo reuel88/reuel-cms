@@ -1,6 +1,7 @@
 const userModal = require('../models').user;
 const jwt = require('jsonwebtoken');
 const constants = require('../config/constants');
+const userController = require('./userController');
 
 function getToken(headers) {
     if (headers && headers.authorization) {
@@ -17,17 +18,7 @@ function getToken(headers) {
 
 module.exports = {
     register(req, res) {
-        if (!req.body.email || !req.body.password) {
-            return res.status(400).send({message: 'Email and Password are missing'});
-        } else {
-            return userModal
-                .create({
-                    email: req.body.email,
-                    password: req.body.password
-                })
-                .then(user => res.status(201).send(user))
-                .catch(error => res.status(400).send(error));
-        }
+        return userController.add(req, res);
     },
     login(req, res) {
         return userModal

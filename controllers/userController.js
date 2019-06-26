@@ -1,7 +1,9 @@
 const userModal = require('../models').user;
 const profileModel = require('../models').profile;
 const roleModel = require('../models').role;
+const userRoleModel = require('../models').userRole;
 const userSettingsModel = require('../models').userSetting;
+
 
 module.exports = {
     list(req, res) {
@@ -46,18 +48,33 @@ module.exports = {
         if (!req.body.email || !req.body.password) {
             return res.status(400).send({message: 'Email and/or Password are missing'});
         } else {
-            return userModal
-                .create({
+
+            return Promise.all([
+                userModal.create({
                     email: req.body.email,
-                    password: req.body.password
+                    password: req.body.password,
+                }),
+                roleModel.findOne({
+                    where: {
+                        id: 1,
+                    }
                 })
-                .then(user => res.status(201).send(user))
+            ])
+                .then(response => {
+                    userRoleModel
+                        .create({
+                            userId: response[0].id,
+                            roleId: response[1].id
+                        })
+                        .then(() => {
+                            res.status(201).send(response[0]);
+                        })
+                        .catch(error => res.status(400).send(error));
+                })
                 .catch(error => res.status(400).send(error));
         }
     },
     update(req, res) {
-        console.log(req.body);
-
         return userModal
             .findByPk(req.params.id, {
                 include: [{
@@ -77,7 +94,7 @@ module.exports = {
                 return user
                     .update({
                         email: req.body.email,
-                        password: req.body.password
+                        password: req.body.password,
                     })
                     .then(() => res.status(200).send(user))
                     .catch(error => res.status(400).send(error));
