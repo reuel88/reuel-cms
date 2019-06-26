@@ -1,4 +1,7 @@
 'use strict';
+
+const constants = require('../config/constants');
+
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.createTable('emailQueues', {
@@ -33,7 +36,9 @@ module.exports = {
                 type: Sequelize.STRING
             },
             status: {
-                type: Sequelize.STRING
+                type: Sequelize.STRING,
+                allowNull: false,
+                defaultValue: constants.OPEN
             },
             createdAt: {
                 allowNull: false,
@@ -45,7 +50,7 @@ module.exports = {
             }
         });
     },
-    down: (queryInterface, Sequelize) => {
+    down: (queryInterface) => {
         return queryInterface.dropTable('emailQueues');
     }
 };

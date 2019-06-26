@@ -1,18 +1,32 @@
 'use strict';
+
+const constants = require('../config/constants');
+
 module.exports = (sequelize, DataTypes) => {
-  const mail = sequelize.define('emailQueue', {
-    from: DataTypes.STRING,
-    to: DataTypes.STRING,
-    cc: DataTypes.STRING,
-    bcc: DataTypes.STRING,
-    subject: DataTypes.STRING,
-    text: DataTypes.STRING,
-    html: DataTypes.STRING,
-    attachments: DataTypes.STRING,
-    status: DataTypes.STRING,
-  }, {});
-  mail.associate = function(models) {
-    // associations can be defined here
-  };
-  return mail;
+    const emailQueue = sequelize.define('emailQueue', {
+        from: {
+            type: DataTypes.STRING,
+        },
+        to: {
+            type: DataTypes.STRING,
+        },
+        cc: {
+            type: DataTypes.STRING,
+        },
+        bcc: {
+            type: DataTypes.STRING,
+        },
+        subject: DataTypes.STRING,
+        text: DataTypes.STRING,
+        html: DataTypes.STRING,
+        attachments: DataTypes.STRING,
+        status: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: constants.OPEN
+        },
+    }, {});
+    emailQueue.associate = function (models) {
+    };
+    return emailQueue;
 };

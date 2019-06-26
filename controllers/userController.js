@@ -43,15 +43,21 @@ module.exports = {
             .catch(error => res.status(400).send(error));
     },
     add(req, res) {
-        return userModal
-            .create({
-                email: req.body.email,
-                password: req.body.password
-            })
-            .then(user => res.status(201).send(user))
-            .catch(error => res.status(400).send(error));
+        if (!req.body.email || !req.body.password) {
+            return res.status(400).send({message: 'Email and/or Password are missing'});
+        } else {
+            return userModal
+                .create({
+                    email: req.body.email,
+                    password: req.body.password
+                })
+                .then(user => res.status(201).send(user))
+                .catch(error => res.status(400).send(error));
+        }
     },
-    update(req, res){
+    update(req, res) {
+        console.log(req.body);
+
         return userModal
             .findByPk(req.params.id, {
                 include: [{
@@ -65,7 +71,7 @@ module.exports = {
                     as: 'userSettings'
                 }]
             })
-            .then( user => {
+            .then(user => {
                 if (!user) return res.status(404).send({message: 'User Not Found'});
 
                 return user
@@ -78,7 +84,7 @@ module.exports = {
             })
             .catch(error => res.status(400).send(error));
     },
-    delete(req, res){
+    delete(req, res) {
         return userModal
             .findByPk(req.params.id)
             .then(user => {

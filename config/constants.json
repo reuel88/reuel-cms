@@ -1,3 +1,4 @@
 {
-  "SALT": "myAuthSecret"
+  "SALT": "myAuthSecret",
+  "OPEN": "OPEN"
 }
