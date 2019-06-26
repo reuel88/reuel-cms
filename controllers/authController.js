@@ -31,7 +31,7 @@ module.exports = {
     },
     login(req, res) {
         return userModal
-            .find({
+            .findOne({
                 where: {
                     email: req.body.email,
                     status: 'active'

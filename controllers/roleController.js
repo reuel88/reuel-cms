@@ -17,7 +17,7 @@ module.exports = {
     // Get
     getById(req, res) {
         return RoleModel
-            .findById(req.params.id, {
+            .findByPk(req.params.id, {
                 include: [{
                     model: UserModel,
                     as: 'users'
@@ -41,7 +41,7 @@ module.exports = {
     // Update
     update(req, res){
         return RoleModel
-            .findById(req.params.id, {
+            .findByPk(req.params.id, {
                 include: [{
                     model: UserModel,
                     as: 'users'
@@ -62,7 +62,7 @@ module.exports = {
     // Delete
     delete(req, res){
         return RoleModel
-            .findById(req.params.id)
+            .findByPk(req.params.id)
             .then(role => {
                 if (!role) return res.status(404).send({message: 'Role Not Found'});
 

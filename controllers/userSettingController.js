@@ -15,7 +15,7 @@ module.exports = {
     },
     getById(req, res) {
         return userSettingModel
-            .findById(req.params.id, {
+            .findByPk(req.params.id, {
                 include: [{
                     model: userModel,
                     as: 'user'
@@ -37,7 +37,7 @@ module.exports = {
     },
     update(req, res) {
         return userSettingModel
-            .findById(req.params.id, {
+            .findByPk(req.params.id, {
                 include: [{
                     model: userModel,
                     as: 'user'
@@ -60,7 +60,7 @@ module.exports = {
     },
     delete(req, res) {
         return userSettingModel
-            .findById(req.params.id)
+            .findByPk(req.params.id)
             .then(userSetting => {
                 if (!userSetting) return res.status(404).send({message: 'User Setting Not Found'});
 

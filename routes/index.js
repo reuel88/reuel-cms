@@ -34,10 +34,10 @@ router.delete('/api/v1/role/:id', roleController.delete);
 
 /* user router */
 router.get('/api/v1/user', passport.authenticate('jwt', {session: false}), authController.authenticateToken, userController.list);
-router.get('/api/v1/user/:id', userController.getById);
-router.post('/api/v1/user/', userController.add);
-router.put('/api/v1/user/:id', userController.update);
-router.delete('/api/v1/user/:id', userController.delete);
+router.get('/api/v1/user/:id', passport.authenticate('jwt', {session: false}), authController.authenticateToken,userController.getById);
+router.post('/api/v1/user/', passport.authenticate('jwt', {session: false}), authController.authenticateToken,userController.add);
+router.put('/api/v1/user/:id', passport.authenticate('jwt', {session: false}), authController.authenticateToken,userController.update);
+router.delete('/api/v1/user/:id',passport.authenticate('jwt', {session: false}), authController.authenticateToken, userController.delete);
 
 /* user setting router */
 router.get('/api/v1/user-setting', userSettingController.list);

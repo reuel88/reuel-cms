@@ -23,7 +23,7 @@ module.exports = {
     },
     getById(req, res) {
         return userModal
-            .findById(req.params.id, {
+            .findByPk(req.params.id, {
                 include: [{
                     model: profileModel,
                     as: 'profile'
@@ -53,7 +53,7 @@ module.exports = {
     },
     update(req, res){
         return userModal
-            .findById(req.params.id, {
+            .findByPk(req.params.id, {
                 include: [{
                     model: profileModel,
                     as: 'profile'
@@ -80,7 +80,7 @@ module.exports = {
     },
     delete(req, res){
         return userModal
-            .findById(req.params.id)
+            .findByPk(req.params.id)
             .then(user => {
                 if (!user) return res.status(404).send({message: 'User Not Found'});
 
