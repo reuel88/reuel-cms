@@ -26,12 +26,14 @@ module.exports = {
     getById(req, res) {
         return userModal
             .findByPk(req.params.id, {
+                attributes: ['email', 'status', 'lastLogin'],
                 include: [{
                     model: profileModel,
                     as: 'profile'
                 }, {
                     model: roleModel,
-                    as: 'roles'
+                    as: 'roles',
+                    attributes: ['roleName']
                 }, {
                     model: userSettingsModel,
                     as: 'userSettings'
