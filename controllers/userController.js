@@ -143,27 +143,32 @@ module.exports = {
 
     // User Settings
 
-    userSettingList(req, res){
+    userSettingsList(req, res) {
+       return userSettingsModel
+            .findAll({
+                where: {
+                    userId: req.params.id
+                }
+            })
+            .then(userSettings => res.status(200).send(userSettings))
+            .catch(error => res.status(400).send(error));
+    },
+    userSettingsGetById(req, res) {
         res.status(200).send({
             params: req.params
         });
     },
-    userSettingGetById(req, res){
+    userSettingsAdd(req, res) {
         res.status(200).send({
             params: req.params
         });
     },
-    userSettingAdd(req, res){
+    userSettingsUpdate(req, res) {
         res.status(200).send({
             params: req.params
         });
     },
-    userSettingUpdate(req, res){
-        res.status(200).send({
-            params: req.params
-        });
-    },
-    userSettingDelete(req, res){
+    userSettingsDelete(req, res) {
         res.status(200).send({
             params: req.params
         });

@@ -29,11 +29,11 @@ router.post('/user/', userController.add);
 router.put('/user/:id', userController.update);
 router.delete('/user/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userController.delete);
 
-router.get('/user/:id/user-setting', userController.userSettingList);
-router.get('/user/:id/user-setting/:userSettingId', userController.userSettingGetById);
-router.post('/user/:id/user-setting', userController.userSettingAdd);
-router.put('/user/:id/user-setting/:userSettingId', userController.userSettingUpdate);
-router.delete('/user/:id/user-setting/:userSettingId', userController.userSettingDelete);
+router.get('/user/:id/user-setting', userController.userSettingsList);
+router.get('/user/:id/user-setting/:userSettingId', userController.userSettingsGetById);
+router.post('/user/:id/user-setting', userController.userSettingsAdd);
+router.put('/user/:id/user-setting/:userSettingId', userController.userSettingsUpdate);
+router.delete('/user/:id/user-setting/:userSettingId', userController.userSettingsDelete);
 
 /* user setting router */
 router.get('/user-setting', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userSettingController.list);
