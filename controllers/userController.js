@@ -141,19 +141,31 @@ module.exports = {
             .catch(error => res.status(400).send(error));
     },
 
-    userSettingList(req, res){
+    // User Settings
 
+    userSettingList(req, res){
+        res.status(200).send({
+            params: req.params
+        });
     },
     userSettingGetById(req, res){
-
+        res.status(200).send({
+            params: req.params
+        });
     },
     userSettingAdd(req, res){
-
+        res.status(200).send({
+            params: req.params
+        });
     },
     userSettingUpdate(req, res){
-
+        res.status(200).send({
+            params: req.params
+        });
     },
     userSettingDelete(req, res){
-
+        res.status(200).send({
+            params: req.params
+        });
     },
 };
