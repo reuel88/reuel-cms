@@ -1,7 +1,9 @@
-const userModal = require('../models').user;
 const jwt = require('jsonwebtoken');
+const userModal = require('../models').user;
+const roleModel = require('../models').role;
 const constants = require('../config/constants');
 const userController = require('./userController');
+const passport = require('../config/passport');
 
 function getToken(headers) {
     if (headers && headers.authorization) {
@@ -26,15 +28,29 @@ module.exports = {
                 where: {
                     email: req.body.email,
                     status: 'active'
-                }
+                },
+                include: [
+                    {
+                        model: roleModel,
+                        as: 'roles',
+                        attributes: ['roleName']
+                    }
+                ]
             })
             .then(user => {
-                if (!user) return res.status(401).send({message: 'Authentication failed. User not found'});
+                if (!user) return res.status(401).send({
+                    name: 'Unauthorized',
+                    errors: [{
+                        message: 'Authentication failed. User not found'
+                    }]
+                });
 
                 user.comparePassword(req.body.password, (err, isMatch) => {
                     if (!(isMatch && !err)) return res.status(401).send({
-                        success: false,
-                        message: 'Authentication failed. Wrong password.'
+                        name: 'Unauthorized',
+                        errors: [{
+                            message: 'Authentication failed. Wrong password.'
+                        }]
                     });
 
                     user
@@ -44,16 +60,45 @@ module.exports = {
                         .then(() => {
                             const token = jwt.sign(JSON.parse(JSON.stringify(user)), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
                             jwt.verify(token, constants.SALT, (err, data) => console.log(err, data));
-                            return res.json({success: true, token: `JWT ${token}`})
+                            return res.json({token: `JWT ${token}`})
                         })
                         .catch(error => res.status(400).send(error));
                 });
             })
             .catch(error => res.status(400).send(error));
     },
-    authenticateToken(req, res, next) {
+    authenticateToken(req, res, next){
+        return passport.authenticate("jwt", {
+            session: false
+        }, (err, user, info) => {
+            if (err) {
+                console.log(err, info);
+                return next(err);
+            }
+
+            if (!user) {
+                return res.status(403).send({
+                    name: 'Unauthorized',
+                    errors: [{
+                        message: 'user unauthorized'
+                    }]
+                });
+            }
+            // Forward user information to the next middleware
+            req.user = user;
+            next();
+        })(req, res, next);
+    },
+    authenticateRole(roles, req, res, next) {
         const token = getToken(req.headers);
-        if (!token) return res.status(403).send({success: false, message: 'Unauthorized.'});
+        const decode = jwt.verify(token, constants.SALT);
+
+        if (!roles.includes(decode.roles[0].roleName)) return res.status(403).send({
+            name: 'Unauthorized',
+            errors: [{
+                message: 'user unauthorized'
+            }]
+        });
 
         next();
     }

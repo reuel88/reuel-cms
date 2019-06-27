@@ -1,20 +1,21 @@
 'use strict';
+const roles = require('../config/roles');
 
 module.exports = {
     up: (queryInterface) => {
         return queryInterface.bulkInsert('roles', [
             {
-                roleName: 'god',
+                roleName: roles.GOD,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },
             {
-                roleName: 'admin',
+                roleName: roles.ADMIN,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },
             {
-                roleName: 'user',
+                roleName: roles.USER,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },

@@ -3,6 +3,7 @@ const profileModel = require('../models').profile;
 const roleModel = require('../models').role;
 const userRoleModel = require('../models').userRole;
 const userSettingsModel = require('../models').userSetting;
+const roles = require('../config/roles');
 
 
 module.exports = {
@@ -58,7 +59,7 @@ module.exports = {
                 }),
                 roleModel.findOne({
                     where: {
-                        id: 1,
+                        roleName: roles.USER,
                     }
                 })
             ])

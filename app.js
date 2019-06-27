@@ -29,8 +29,14 @@ app.use(sassMiddleware({
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-// app.use('/api/v1', passport.authenticate('jwt', {session: false}), apiRouter);
-app.use('/api/v1', authController.authenticateToken, apiRouter);
+// app.use('/api/v1',
+//     passport.authenticate('jwt', {session: false}),
+//     apiRouter
+// );
+app.use('/api/v1',
+    authController.authenticateToken,
+    apiRouter
+);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
