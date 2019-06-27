@@ -8,21 +8,44 @@ const roles = require('../config/roles');
 
 module.exports = {
     list(req, res) {
+        let limit = req.query.limit || 10;
+        let offset = 0;
+
         return userModal
-            .findAll({
-                include: [{
-                    model: profileModel,
-                    as: 'profile'
-                }, {
-                    model: roleModel,
-                    as: 'roles'
-                }, {
-                    model: userSettingsModel,
-                    as: 'userSettings'
-                }]
+            .findAndCountAll()
+            .then(response => {
+                let page = req.query.page;
+                let pages = Math.ceil(response.count / limit);
+
+                if (page <= pages) offset = limit * (page - 1);
+
+                userModal
+                    .findAll({
+                        include: [{
+                            model: profileModel,
+                            as: 'profile'
+                        }, {
+                            model: roleModel,
+                            as: 'roles'
+                        }, {
+                            model: userSettingsModel,
+                            as: 'userSettings'
+                        }],
+                        limit: limit,
+                        offset: offset,
+                    })
+                    .then(users => res.status(200).send(
+                        {
+                            result: users,
+                            count: response.count,
+                            pages: pages
+                        }
+                    ))
+                    .catch(error => res.status(400).send(error));
+
             })
-            .then(users => res.status(200).send(users))
             .catch(error => res.status(400).send(error));
+
     },
     getById(req, res) {
         return userModal
@@ -51,7 +74,6 @@ module.exports = {
         if (!req.body.email || !req.body.password) {
             return res.status(400).send({message: 'Email and/or Password are missing'});
         } else {
-
             return Promise.all([
                 userModal.create({
                     email: req.body.email,
@@ -117,5 +139,21 @@ module.exports = {
 
             })
             .catch(error => res.status(400).send(error));
-    }
+    },
+
+    userSettingList(req, res){
+
+    },
+    userSettingGetById(req, res){
+
+    },
+    userSettingAdd(req, res){
+
+    },
+    userSettingUpdate(req, res){
+
+    },
+    userSettingDelete(req, res){
+
+    },
 };

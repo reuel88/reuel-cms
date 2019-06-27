@@ -4,14 +4,34 @@ const UserModel = require('../models').user;
 module.exports = {
     // Get
     list(req, res) {
+        let limit = req.query.limit || 10;
+        let offset = 0;
+
         return RoleModel
-            .findAll({
-                include: [{
-                    model: UserModel,
-                    as: 'users'
-                }]
+            .findAndCountAll()
+            .then(response => {
+                let page = req.query.page;
+                let pages = Math.ceil(response.count / limit);
+
+                if (page <= pages) offset = limit * (page - 1);
+
+                RoleModel
+                    .findAll({
+                        include: [{
+                            model: UserModel,
+                            as: 'users'
+                        }]
+                    })
+                    .then(roles => res.status(200).send(
+                        {
+                            result: roles,
+                            count: response.count,
+                            pages: pages
+                        }
+                    ))
+                    .catch(error => res.status(400).send(error));
+
             })
-            .then(roles => res.status(200).send(roles))
             .catch(error => res.status(400).send(error));
     },
     // Get
@@ -32,14 +52,14 @@ module.exports = {
 
     },
     // Post
-    add(req, res){
+    add(req, res) {
         return RoleModel
             .create({roleName: req.body.roleName})
             .then(role => res.status(201).send(role))
             .catch(error => res.status(400).send(error));
     },
     // Update
-    update(req, res){
+    update(req, res) {
         return RoleModel
             .findByPk(req.params.id, {
                 include: [{
@@ -60,7 +80,7 @@ module.exports = {
             .catch(error => res.status(400).send(error));
     },
     // Delete
-    delete(req, res){
+    delete(req, res) {
         return RoleModel
             .findByPk(req.params.id)
             .then(role => {

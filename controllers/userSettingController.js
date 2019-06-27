@@ -3,15 +3,36 @@ const userModel = require('../models').user;
 
 module.exports = {
     list(req, res) {
+        let limit = req.query.limit || 10;
+        let offset = 0;
+
         return userSettingModel
-            .findAll({
-                include: [{
-                    model: userModel,
-                    as: 'user'
-                }]
+            .findAndCountAll()
+            .then(response => {
+                let page = req.query.page;
+                let pages = Math.ceil(response.count / limit);
+
+                if (page <= pages) offset = limit * (page - 1);
+
+                userSettingModel
+                    .findAll({
+                        include: [{
+                            model: userModel,
+                            as: 'user'
+                        }]
+                    })
+                    .then(userSettings => res.status(200).send(
+                        {
+                            result: userSettings,
+                            count: response.count,
+                            pages: pages
+                        }
+                    ))
+                    .catch(error => res.status(400).send(error));
+
             })
-            .then(userSettings => res.status(200).send(userSettings))
             .catch(error => res.status(400).send(error));
+
     },
     getById(req, res) {
         return userSettingModel

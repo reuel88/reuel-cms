@@ -2,10 +2,30 @@ const emailQueueModel = require('../models').emailQueue;
 
 module.exports = {
     list(req, res) {
+        let limit = req.query.limit || 10;
+        let offset = 0;
+
         return emailQueueModel
-            .findAll()
-            .then(emailQueues => res.status(200).send(emailQueues))
-            .catch(error => res.status(400).send(error))
+            .findAndCountAll()
+            .then(response => {
+                let page = req.query.page;
+                let pages = Math.ceil(response.count / limit);
+
+                if (page <= pages) offset = limit * (page - 1);
+
+                emailQueueModel
+                    .findAll()
+                    .then(emailQueues => res.status(200).send(
+                        {
+                            result: emailQueues,
+                            count: response.count,
+                            pages: pages
+                        }
+                    ))
+                    .catch(error => res.status(400).send(error));
+
+            })
+            .catch(error => res.status(400).send(error));
     },
     getById(req, res) {
         return emailQueueModel

@@ -3,15 +3,36 @@ const profileModel = require('../models').profile;
 
 module.exports = {
     list(req, res) {
+        let limit = req.query.limit || 10;
+        let offset = 0;
+
         return profileModel
-            .findAll({
-                include: [{
-                    model: userModal,
-                    as: 'user'
-                }]
+            .findAndCountAll()
+            .then(response => {
+                let page = req.query.page;
+                let pages = Math.ceil(response.count / limit);
+
+                if (page <= pages) offset = limit * (page - 1);
+
+                profileModel
+                    .findAll({
+                        include: [{
+                            model: userModal,
+                            as: 'user'
+                        }]
+                    })
+                    .then(profiles => res.status(200).send(
+                        {
+                            result: profiles,
+                            count: response.count,
+                            pages: pages
+                        }
+                    ))
+                    .catch(error => res.status(400).send(error));
+
             })
-            .then(profiles => res.status(200).send(profiles))
             .catch(error => res.status(400).send(error));
+
 
     },
     getById(req, res) {
