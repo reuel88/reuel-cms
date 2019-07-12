@@ -1,17 +1,16 @@
-const userModal = require('../models').user;
+const userModel = require('../models').user;
 const profileModel = require('../models').profile;
 const roleModel = require('../models').role;
 const userRoleModel = require('../models').userRole;
-const userSettingsModel = require('../models').userSetting;
+const userSettingModel = require('../models').userSetting;
 const roles = require('../config/roles');
-
 
 module.exports = {
     list(req, res) {
         let limit = req.query.limit || 10;
         let offset = 0;
 
-        return userModal
+        return userModel
             .findAndCountAll()
             .then(response => {
                 let page = req.query.page;
@@ -19,7 +18,7 @@ module.exports = {
 
                 if (page <= pages) offset = limit * (page - 1);
 
-                userModal
+                userModel
                     .findAll({
                         include: [{
                             model: profileModel,
@@ -28,7 +27,7 @@ module.exports = {
                             model: roleModel,
                             as: 'roles'
                         }, {
-                            model: userSettingsModel,
+                            model: userSettingModel,
                             as: 'userSettings'
                         }],
                         limit: limit,
@@ -48,7 +47,7 @@ module.exports = {
 
     },
     getById(req, res) {
-        return userModal
+        return userModel
             .findByPk(req.params.id, {
                 attributes: ['email', 'status', 'lastLogin'],
                 include: [{
@@ -59,7 +58,7 @@ module.exports = {
                     as: 'roles',
                     attributes: ['roleName']
                 }, {
-                    model: userSettingsModel,
+                    model: userSettingModel,
                     as: 'userSettings'
                 }]
             })
@@ -85,7 +84,7 @@ module.exports = {
             });
         } else {
             return Promise.all([
-                userModal.create({
+                userModel.create({
                     email: req.body.email,
                     password: req.body.password,
                 }),
@@ -102,6 +101,7 @@ module.exports = {
                             roleId: response[1].id
                         })
                         .then(() => {
+                            // TODO: should probably not send the user back??
                             res.status(201).send(response[0]);
                         })
                         .catch(error => res.status(400).send(error));
@@ -110,7 +110,7 @@ module.exports = {
         }
     },
     update(req, res) {
-        return userModal
+        return userModel
             .findByPk(req.params.id, {
                 include: [{
                     model: profileModel,
@@ -119,7 +119,7 @@ module.exports = {
                     model: roleModel,
                     as: 'roles'
                 }, {
-                    model: userSettingsModel,
+                    model: userSettingModel,
                     as: 'userSettings'
                 }]
             })
@@ -142,7 +142,7 @@ module.exports = {
             .catch(error => res.status(400).send(error));
     },
     delete(req, res) {
-        return userModal
+        return userModel
             .findByPk(req.params.id)
             .then(user => {
                 if (!user) return res.status(404).send({
@@ -164,7 +164,7 @@ module.exports = {
     // User Settings
 
     userSettingsList(req, res) {
-       return userSettingsModel
+        return userSettingModel
             .findAll({
                 where: {
                     userId: req.params.id
@@ -174,23 +174,76 @@ module.exports = {
             .catch(error => res.status(400).send(error));
     },
     userSettingsGetById(req, res) {
-        res.status(200).send({
-            params: req.params
-        });
+        return userSettingModel
+            .findAll({
+                where: {
+                    id: req.params.id,
+                    userId: req.params.userSettingId
+                },
+                include: [{
+                    model: userModel,
+                    as: 'user'
+                }]
+            })
+            .then(userSetting => res.status(200).send(userSetting))
+            .catch(error => res.status(400).send(error));
+
     },
     userSettingsAdd(req, res) {
-        res.status(200).send({
-            params: req.params
-        });
+        return userSettingModel
+            .create({
+                userId: req.params.id,
+                label: req.body.label,
+                value: req.body.value,
+                enabled: req.body.enabled,
+            })
+            .then(userSetting => res.status(200).send(userSetting))
+            .catch(error => res.status(400).send(error));
     },
     userSettingsUpdate(req, res) {
-        res.status(200).send({
-            params: req.params
-        });
+        return userSettingModel
+            .findByPk(req.params.userSettingId, {
+                include: [{
+                    model: userModel,
+                    as: 'user'
+                }]
+            })
+            .then(userSetting => {
+                if (!userSetting) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Setting Not Found'
+                    }]
+                });
+
+                return userSetting
+                    .update({
+                        userId: req.body.userId,
+                        label: req.body.label,
+                        value: req.body.value,
+                        enabled: req.body.enabled,
+                    })
+                    .then(() => res.status(200).send(userSetting))
+                    .catch(error => res.status(400).send(error));
+            })
+            .catch(error => res.status(400).send(error));
     },
     userSettingsDelete(req, res) {
-        res.status(200).send({
-            params: req.params
-        });
+        return userSettingModel
+            .findByPk(req.params.userSettingId)
+            .then(userSetting => {
+                if (!userSetting) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Setting Not Found'
+                    }]
+                });
+
+                return userSetting
+                    .destroy()
+                    .then(() => res.status(204).send())
+                    .catch(error => res.status(400).send(error));
+            })
+            .catch(error => res.status(400).send(error));
     },
 };

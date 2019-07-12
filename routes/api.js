@@ -8,38 +8,40 @@ const userController = require('../controllers/userController');
 const userSettingController = require('../controllers/userSettingController');
 const authController = require('../controllers/authController');
 
+const GodRole = (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next);
+
 /* profile router */
-router.get('/profile', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), profileController.list);
-router.get('/profile/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), profileController.getById);
-router.post('/profile/', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), profileController.add);
-router.put('/profile/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), profileController.update);
-router.delete('/profile/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), profileController.delete);
+router.get('/profile', GodRole, profileController.list);
+router.get('/profile/:id', GodRole, profileController.getById);
+router.post('/profile/', GodRole, profileController.add);
+router.put('/profile/:id', GodRole, profileController.update);
+router.delete('/profile/:id', GodRole, profileController.delete);
 
 /* role router */
 router.get('/role', roleController.list);
-router.get('/role/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), roleController.getById);
-router.post('/role/', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), roleController.add);
-router.put('/role/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), roleController.update);
-router.delete('/role/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), roleController.delete);
+router.get('/role/:id', GodRole, roleController.getById);
+router.post('/role/', GodRole, roleController.add);
+router.put('/role/:id', GodRole, roleController.update);
+router.delete('/role/:id', GodRole, roleController.delete);
 
 /* user router */
 router.get('/user', userController.list);
 router.get('/user/:id', userController.getById);
 router.post('/user/', userController.add);
 router.put('/user/:id', userController.update);
-router.delete('/user/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userController.delete);
+router.delete('/user/:id', GodRole, userController.delete);
 
 router.get('/user/:id/user-setting', userController.userSettingsList);
 router.get('/user/:id/user-setting/:userSettingId', userController.userSettingsGetById);
-router.post('/user/:id/user-setting', userController.userSettingsAdd);
+router.post('/user/:id/user-setting', GodRole, userController.userSettingsAdd);
 router.put('/user/:id/user-setting/:userSettingId', userController.userSettingsUpdate);
-router.delete('/user/:id/user-setting/:userSettingId', userController.userSettingsDelete);
+router.delete('/user/:id/user-setting/:userSettingId', GodRole, userController.userSettingsDelete);
 
 /* user setting router */
-router.get('/user-setting', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userSettingController.list);
-router.get('/user-setting/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userSettingController.getById);
-router.post('/user-setting/', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userSettingController.add);
-router.put('/user-setting/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userSettingController.update);
-router.delete('/user-setting/:id', (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next), userSettingController.delete);
+router.get('/user-setting', GodRole, userSettingController.list);
+router.get('/user-setting/:id', GodRole, userSettingController.getById);
+router.post('/user-setting/', GodRole, userSettingController.add);
+router.put('/user-setting/:id', GodRole, userSettingController.update);
+router.delete('/user-setting/:id', GodRole, userSettingController.delete);
 
 module.exports = router;
