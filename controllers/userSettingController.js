@@ -65,7 +65,12 @@ module.exports = {
                 }]
             })
             .then(userSetting => {
-                if (!userSetting) return res.status(404).send({message: 'User Setting Not Found'});
+                if (!userSetting) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Setting Not Found'
+                    }]
+                });
 
                 return userSetting
                     .update({
@@ -83,7 +88,12 @@ module.exports = {
         return userSettingModel
             .findByPk(req.params.id)
             .then(userSetting => {
-                if (!userSetting) return res.status(404).send({message: 'User Setting Not Found'});
+                if (!userSetting) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Setting Not Found'
+                    }]
+                });
 
                 return userSetting
                     .destroy()

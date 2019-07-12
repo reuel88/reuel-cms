@@ -64,7 +64,12 @@ module.exports = {
                 }]
             })
             .then(user => {
-                if (!user) return res.status(404).send({message: 'User Not Found'});
+                if (!user) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Not Found'
+                    }]
+                });
 
                 return res.status(200).send(user);
             })
@@ -72,7 +77,12 @@ module.exports = {
     },
     add(req, res) {
         if (!req.body.email || !req.body.password) {
-            return res.status(400).send({message: 'Email and/or Password are missing'});
+            return res.status(400).send({
+                name: 'Error',
+                errors: [{
+                    message: 'Email and/or Password are missing'
+                }]
+            });
         } else {
             return Promise.all([
                 userModal.create({
@@ -114,7 +124,12 @@ module.exports = {
                 }]
             })
             .then(user => {
-                if (!user) return res.status(404).send({message: 'User Not Found'});
+                if (!user) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Not Found'
+                    }]
+                });
 
                 return user
                     .update({
@@ -130,7 +145,12 @@ module.exports = {
         return userModal
             .findByPk(req.params.id)
             .then(user => {
-                if (!user) return res.status(404).send({message: 'User Not Found'});
+                if (!user) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Not Found'
+                    }]
+                });
 
                 return user
                     .destroy()
