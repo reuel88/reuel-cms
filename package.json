@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "nodemon ./bin/www",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "db:migrate": "./node_modules/.bin/sequelize db:migrate",
+    "db:seed:all": "./node_modules/.bin/sequelize db:seed:all"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",

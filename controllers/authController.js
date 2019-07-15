@@ -89,11 +89,11 @@ module.exports = {
             next();
         })(req, res, next);
     },
-    authenticateRole(roles, req, res, next) {
+    authenticateRole(allowedRoles, req, res, next) {
         const token = getToken(req.headers);
         const decode = jwt.verify(token, constants.SALT);
 
-        if (!roles.includes(decode.roles[0].roleName)) return res.status(403).send({
+        if (!allowedRoles.includes(decode.roles[0].roleName)) return res.status(403).send({
             name: 'Unauthorized',
             errors: [{
                 message: 'user unauthorized'

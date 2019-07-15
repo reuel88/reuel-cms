@@ -44,7 +44,12 @@ module.exports = {
                 }]
             })
             .then(profile => {
-                if (!profile) return res.status(404).send({message: 'Profile Not Found'});
+                if (!profile) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Profile Not Found'
+                    }]
+                });
 
                 res.status(200).send(profile);
             })
@@ -70,7 +75,12 @@ module.exports = {
                 }]
             })
             .then(profile => {
-                if (!profile) return res.status(404).send({message: 'Profile Not Found'});
+                if (!profile) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Profile Not Found'
+                    }]
+                });
 
                 return profile
                     .update({
@@ -88,7 +98,12 @@ module.exports = {
         return profileModel
             .findByPk(req.params.id)
             .then(profile => {
-                if (!profile) return res.status(404).send({message: 'Profile Not Found'});
+                if (!profile) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Profile Not Found'
+                    }]
+                });
 
                 return profile
                     .destroy()

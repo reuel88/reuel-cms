@@ -44,7 +44,12 @@ module.exports = {
                 }]
             })
             .then(role => {
-                if (!role) return res.status(404).send({message: 'Role Not Found'});
+                if (!role) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Role Not Found'
+                    }]
+                });
 
                 return res.status(200).send(role);
             })
@@ -68,7 +73,12 @@ module.exports = {
                 }]
             })
             .then(role => {
-                if (!role) return res.status(404).send({message: 'Role Not Found'});
+                if (!role) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Role Not Found'
+                    }]
+                });
 
                 return role
                     .update({
@@ -84,7 +94,12 @@ module.exports = {
         return RoleModel
             .findByPk(req.params.id)
             .then(role => {
-                if (!role) return res.status(404).send({message: 'Role Not Found'});
+                if (!role) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Role Not Found'
+                    }]
+                });
 
                 return role
                     .destroy()

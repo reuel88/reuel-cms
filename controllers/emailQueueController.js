@@ -31,7 +31,12 @@ module.exports = {
         return emailQueueModel
             .findByPk(req.params.id)
             .then(emailQueue => {
-                if (!emailQueue) return res.status(404).send({message: 'User Not Found'});
+                if (!emailQueue) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Not Found'
+                    }]
+                });
 
                 return res.status(200).send(emailQueue);
             })
@@ -57,7 +62,13 @@ module.exports = {
         return emailQueueModel
             .findByPk(req.params.id)
             .then(emailQueue => {
-                if (!emailQueue) return res.status(404).send({message: 'Email queue not found'});
+                if (!emailQueue) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Email queue not found'
+                    }]
+
+                });
 
                 return emailQueue
                     .update({
@@ -80,7 +91,12 @@ module.exports = {
         return emailQueueModel
             .findByPk(req.params.id)
             .then(emailQueue => {
-                if (!emailQueue) return res.status(404).send({message: 'Email queue not found'});
+                if (!emailQueue) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Email queue not found'
+                    }]
+                });
 
                 return emailQueue
                     .destroy()
