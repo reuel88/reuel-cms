@@ -95,6 +95,10 @@ module.exports = {
                 })
             ])
                 .then(response => {
+                    /**
+                     * May want to generate the user settings here.
+                     */
+
                     userRoleModel
                         .create({
                             userId: response[0].id,
@@ -163,7 +167,7 @@ module.exports = {
 
     // User Settings
 
-    userSettingsList(req, res) {
+    userSettingList(req, res) {
         return userSettingModel
             .findAll({
                 where: {
@@ -173,7 +177,7 @@ module.exports = {
             .then(userSettings => res.status(200).send(userSettings))
             .catch(error => res.status(400).send(error));
     },
-    userSettingsGetById(req, res) {
+    userSettingGetById(req, res) {
         return userSettingModel
             .findAll({
                 where: {
@@ -189,7 +193,7 @@ module.exports = {
             .catch(error => res.status(400).send(error));
 
     },
-    userSettingsAdd(req, res) {
+    userSettingAdd(req, res) {
         return userSettingModel
             .create({
                 userId: req.params.id,
@@ -200,7 +204,7 @@ module.exports = {
             .then(userSetting => res.status(200).send(userSetting))
             .catch(error => res.status(400).send(error));
     },
-    userSettingsUpdate(req, res) {
+    userSettingUpdate(req, res) {
         return userSettingModel
             .findByPk(req.params.userSettingId, {
                 include: [{
@@ -228,7 +232,7 @@ module.exports = {
             })
             .catch(error => res.status(400).send(error));
     },
-    userSettingsDelete(req, res) {
+    userSettingDelete(req, res) {
         return userSettingModel
             .findByPk(req.params.userSettingId)
             .then(userSetting => {

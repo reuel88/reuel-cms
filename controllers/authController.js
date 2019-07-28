@@ -20,6 +20,17 @@ function getToken(headers) {
 
 module.exports = {
     register(req, res) {
+        /**
+         * Need to change up the registration for this if I include organisation based structure
+         *
+         * 1. Ask for email and password
+         *      - generate email to confirm email
+         *      - add to marketing workflow
+         * 2. Ask for company name
+         *      - generate organisation settings & details
+         * 3. Ask for integration details
+         */
+
         return userController.add(req, res);
     },
     login(req, res) {
