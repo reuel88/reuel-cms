@@ -31,11 +31,11 @@ router.post('/user/', userController.add);
 router.put('/user/:id', userController.update);
 router.delete('/user/:id', GodRole, userController.delete);
 
-router.get('/user/:id/user-setting', userController.userSettingsList);
-router.get('/user/:id/user-setting/:userSettingId', userController.userSettingsGetById);
-router.post('/user/:id/user-setting', GodRole, userController.userSettingsAdd);
-router.put('/user/:id/user-setting/:userSettingId', userController.userSettingsUpdate);
-router.delete('/user/:id/user-setting/:userSettingId', GodRole, userController.userSettingsDelete);
+router.get('/user/:id/user-setting', userController.userSettingList);
+router.get('/user/:id/user-setting/:userSettingId', userController.userSettingGetById);
+router.post('/user/:id/user-setting', GodRole, userController.userSettingAdd);
+router.put('/user/:id/user-setting/:userSettingId', userController.userSettingUpdate);
+router.delete('/user/:id/user-setting/:userSettingId', GodRole, userController.userSettingDelete);
 
 /* user setting router */
 router.get('/user-setting', GodRole, userSettingController.list);
