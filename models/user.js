@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 'active'
         },
-
         lastLogin: DataTypes.DATE,
     }, {});
 

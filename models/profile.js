@@ -6,12 +6,27 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         fullName: DataTypes.STRING,
+        firstName: DataTypes.STRING,
+        lastName: DataTypes.STRING,
         birthDate: DataTypes.DATE,
-        gender: DataTypes.STRING
+        sex: DataTypes.STRING
     }, {});
 
     profile.associate = function (models) {
-        // associations can be defined here
+        profile.hasMany(models.profileAddress, {
+            foreignKey: 'profileId',
+            as: 'profileAddresses',
+        });
+
+        profile.hasMany(models.profileEmailAddress, {
+            foreignKey: 'profileId',
+            as: 'profileEmailAddresses',
+        });
+
+        profile.hasMany(models.profilePhoneNumber, {
+            foreignKey: 'profileId',
+            as: 'profilePhoneNumbers',
+        });
     };
 
     return profile;
