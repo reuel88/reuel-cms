@@ -1,12 +1,13 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const profilePhoneNumber = sequelize.define('profilePhoneNumber', {
+  const phoneNumber = sequelize.define('phoneNumber', {
     profileId: DataTypes.INTEGER,
+    customerContactId: DataTypes.INTEGER,
     value: DataTypes.STRING,
     type: DataTypes.STRING
   }, {});
-  profilePhoneNumber.associate = function(models) {
+  phoneNumber.associate = function(models) {
     // associations can be defined here
   };
-  return profilePhoneNumber;
+  return phoneNumber;
 };
