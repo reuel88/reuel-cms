@@ -1,15 +1,10 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
     const emailAddress = sequelize.define('emailAddress', {
-        fullName: DataTypes.STRING,
-        email: {
-            type: DataTypes.STRING,
-            unique: true,
-        },
-        flag: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        }
+        profileId: DataTypes.INTEGER,
+        customerContactId: DataTypes.INTEGER,
+        label: DataTypes.STRING, // (home, work, etc)
+        email: DataTypes.STRING,
     }, {});
     emailAddress.associate = function (models) {
 
