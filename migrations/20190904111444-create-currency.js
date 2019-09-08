@@ -21,7 +21,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       number: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -33,7 +33,7 @@ module.exports = {
       }
     });
   },
-  down: (queryInterface, Sequelize) => {
+  down: (queryInterface) => {
     return queryInterface.dropTable('currencies');
   }
 };
