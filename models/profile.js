@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
     const profile = sequelize.define('profile', {
+        companyId: DataTypes.INTEGER,
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false,

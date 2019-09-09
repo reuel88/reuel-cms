@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "blackmagic1",
+    "password": "root",
     "database": "db_develop",
     "host": "127.0.0.1",
     "dialect": "mysql"

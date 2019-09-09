@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const address = sequelize.define('address', {
+    companyId: DataTypes.INTEGER,
     profileId: DataTypes.INTEGER,
     customerContactId: DataTypes.INTEGER,
     fullAddress: DataTypes.STRING,

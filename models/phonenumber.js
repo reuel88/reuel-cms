@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const phoneNumber = sequelize.define('phoneNumber', {
+    companyId: DataTypes.INTEGER,
     profileId: DataTypes.INTEGER,
     customerContactId: DataTypes.INTEGER,
     value: DataTypes.STRING,
