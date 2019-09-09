@@ -12,6 +12,6 @@ router.get('/', function (req, res) {
 /* Auth router */
 router.post('/register', authController.register);
 router.post('/login', authController.login);
-router.post('/register/:id/company',companyController.register);
+router.post('/register/company', companyController.register);
 
 module.exports = router;

@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
-const userModal = require('../models').user;
-const roleModel = require('../models').role;
-const constants = require('../config/constants');
-const userController = require('./userController');
 const passport = require('../config/passport');
+const constants = require('../config/constants');
+const roles = require('../config/roles');
+const roleModel = require('../models').role;
+const userModel = require('../models').user;
+const userRoleModel = require('../models').userRole;
 
 function getToken(headers) {
     if (headers && headers.authorization) {
@@ -31,10 +32,48 @@ module.exports = {
          * 3. Ask for integration details
          */
 
-        return userController.add(req, res);
+        if (!req.body.email || !req.body.password) {
+            return res.status(400).send({
+                name: 'Error',
+                errors: [{
+                    message: 'Email and/or Password are missing'
+                }]
+            });
+        } else {
+            return Promise.all([
+                userModel.create({
+                    email: req.body.email,
+                    password: req.body.password,
+                }),
+                roleModel.findOne({
+                    where: {
+                        roleName: roles.USER,
+                    }
+                })
+            ])
+                .then(response => {
+                    /**
+                     * May want to generate the user settings here.
+                     */
+
+                    userRoleModel
+                        .create({
+                            userId: response[0].id,
+                            roleId: response[1].id
+                        })
+                        .then(() => {
+                            const token = jwt.sign(JSON.parse(JSON.stringify({userId: response[0].id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
+                            jwt.verify(token, constants.SALT, (err, data) => console.log(err, data));
+
+                            res.status(201).send({redirect: `/register/company?t=${token}`});
+                        })
+                        .catch(error => res.status(400).send(error));
+                })
+                .catch(error => res.status(400).send(error));
+        }
     },
     login(req, res) {
-        return userModal
+        return userModel
             .findOne({
                 where: {
                     email: req.body.email,
