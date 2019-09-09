@@ -13,19 +13,19 @@ module.exports = (sequelize, DataTypes) => {
     }, {});
 
     profile.associate = function (models) {
-        profile.hasMany(models.profileAddress, {
+        profile.hasMany(models.address, {
             foreignKey: 'profileId',
-            as: 'profileAddresses',
+            as: 'addresses',
         });
 
-        profile.hasMany(models.profileEmailAddress, {
+        profile.hasMany(models.emailAddress, {
             foreignKey: 'profileId',
-            as: 'profileEmailAddresses',
+            as: 'emailAddresses',
         });
 
-        profile.hasMany(models.profilePhoneNumber, {
+        profile.hasMany(models.phoneNumber, {
             foreignKey: 'profileId',
-            as: 'profilePhoneNumbers',
+            as: 'phoneNumbers',
         });
     };
 

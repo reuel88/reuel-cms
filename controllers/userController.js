@@ -165,8 +165,7 @@ module.exports = {
             .catch(error => res.status(400).send(error));
     },
 
-    // User Settings
-
+    // User Settings ---------------------------------------------------------------------------------------------------
     userSettingList(req, res) {
         return userSettingModel
             .findAll({
@@ -181,8 +180,8 @@ module.exports = {
         return userSettingModel
             .findAll({
                 where: {
-                    id: req.params.id,
-                    userId: req.params.userSettingId
+                    id: req.params.userSettingId,
+                    userId: req.params.id,
                 },
                 include: [{
                     model: userModel,
@@ -250,4 +249,92 @@ module.exports = {
             })
             .catch(error => res.status(400).send(error));
     },
+
+    // Profile ---------------------------------------------------------------------------------------------------------
+    profileList(req, res){
+        return profileModel
+            .findAll({
+                where:{
+                    userId: req.params.id
+                }
+            })
+            .then(profiles => res.status(200).send(profiles))
+            .catch(error => res.status(400).send(error));
+    },
+    profileGetById(req,res){
+        return profileModel
+            .findAll({
+                where: {
+                    id: req.params.profileId,
+                    userId: req.params.id
+                },
+                include: [{
+                    model: userModel,
+                    as: 'user'
+                }]
+            })
+            .then(profile => res.status(200).send(profile))
+            .catch(error => res.status(400).send(error));
+    },
+    profileAdd(req,res){
+        return profileModel
+            .create({
+                userId: req.params.id,
+                fullName: req.body.fullName,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                birthDate: req.body.birthDate,
+                sex: req.body.sex,
+            })
+            .then(profile => res.status(200).send(profile))
+            .catch(error => res.status(400).send(error));
+    },
+    profileUpdate(req,res){
+        return profileModel
+            .findByPk(req.params.profileId, {
+                include: [{
+                    model: userModel,
+                    as: 'user'
+                }]
+            })
+            .then(profile => {
+                if (!profile) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Profile Not Found'
+                    }]
+                });
+
+                return profile
+                    .update({
+                        userId: req.params.id,
+                        fullName: req.body.fullName,
+                        firstName: req.body.firstName,
+                        lastName: req.body.lastName,
+                        birthDate: req.body.birthDate,
+                        sex: req.body.sex,
+                    })
+                    .then(() => res.status(200).send(profile))
+                    .catch(error => res.status(400).send(error));
+            })
+            .catch(error => res.status(400).send(error));
+    },
+    profileDelete(req,res){
+        return profileModel
+            .findByPk(req.params.profileId)
+            .then(profile => {
+                if (!profile) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'Profile Not Found'
+                    }]
+                });
+
+                return profile
+                    .destroy()
+                    .then(() => res.status(204).send())
+                    .catch(error => res.status(400).send(error));
+            })
+            .catch(error => res.status(400).send(error));
+    }
 };

@@ -37,6 +37,12 @@ router.post('/user/:id/user-setting', GodRole, userController.userSettingAdd);
 router.put('/user/:id/user-setting/:userSettingId', userController.userSettingUpdate);
 router.delete('/user/:id/user-setting/:userSettingId', GodRole, userController.userSettingDelete);
 
+router.get('/user/:id/profile', userController.profileList);
+router.get('/user/:id/profile/:profileId', userController.profileGetById);
+router.post('/user/:id/profile', GodRole, userController.profileAdd);
+router.put('/user/:id/profile/:profileId', userController.profileUpdate);
+router.delete('/user/:id/profile/:profileId', GodRole, userController.profileDelete);
+
 /* user setting router */
 router.get('/user-setting', GodRole, userSettingController.list);
 router.get('/user-setting/:id', GodRole, userSettingController.getById);

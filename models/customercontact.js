@@ -7,7 +7,20 @@ module.exports = (sequelize, DataTypes) => {
     lastName: DataTypes.STRING
   }, {});
   customerContact.associate = function(models) {
-    // associations can be defined here
+    customerContact.hasMany(models.address, {
+      foreignKey: 'customerContactId',
+      as: 'addresses',
+    });
+
+    customerContact.hasMany(models.emailAddress, {
+      foreignKey: 'customerContactId',
+      as: 'emailAddresses',
+    });
+
+    customerContact.hasMany(models.phoneNumber, {
+      foreignKey: 'customerContactId',
+      as: 'phoneNumbers',
+    });
   };
   return customerContact;
 };

@@ -52,7 +52,7 @@ module.exports = {
                 if (!user) return res.status(401).send({
                     name: 'Unauthorized',
                     errors: [{
-                        message: 'Authentication failed. User not found'
+                        message: 'Authentication failed.'
                     }]
                 });
 
@@ -60,7 +60,7 @@ module.exports = {
                     if (!(isMatch && !err)) return res.status(401).send({
                         name: 'Unauthorized',
                         errors: [{
-                            message: 'Authentication failed. Wrong password.'
+                            message: 'Authentication failed.'
                         }]
                     });
 
