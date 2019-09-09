@@ -10,6 +10,13 @@ const authController = require('../controllers/authController');
 
 const GodRole = (req, res, next) => authController.authenticateRole([roles.GOD], req, res, next);
 
+/* company router */
+router.get('/company', GodRole, profileController.list);
+router.get('/company/:id', profileController.getById);
+router.post('/company/', GodRole, profileController.add);
+router.put('/company/:id', profileController.update);
+router.delete('/company/:id', GodRole, profileController.delete);
+
 /* profile router */
 router.get('/profile', GodRole, profileController.list);
 router.get('/profile/:id', GodRole, profileController.getById);

@@ -63,7 +63,6 @@ module.exports = {
                         })
                         .then(() => {
                             const token = jwt.sign(JSON.parse(JSON.stringify({userId: response[0].id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
-                            jwt.verify(token, constants.SALT, (err, data) => console.log(err, data));
 
                             res.status(201).send({redirect: `/register/company?t=${token}`});
                         })
@@ -109,7 +108,6 @@ module.exports = {
                         })
                         .then(() => {
                             const token = jwt.sign(JSON.parse(JSON.stringify(user)), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
-                            jwt.verify(token, constants.SALT, (err, data) => console.log(err, data));
                             return res.json({token: `JWT ${token}`})
                         })
                         .catch(error => res.status(400).send(error));
@@ -117,7 +115,29 @@ module.exports = {
             })
             .catch(error => res.status(400).send(error));
     },
-    authenticateToken(req, res, next){
+    forgotPassword(req, res) {
+        return userModel
+            .findOne({
+                where: {
+                    email: req.body.email,
+                }
+            })
+            .then(user => {
+                const token = jwt.sign(JSON.parse(JSON.stringify({userId: user.id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
+
+                user
+                    .update({
+                        token: token
+                    })
+                    .then()
+                    .catch(error => res.status(400).send(error));
+            })
+            .catch(error => res.status(400).send(error));
+    },
+    resetPassword(req, res) {
+
+    },
+    authenticateToken(req, res, next) {
         return passport.authenticate("jwt", {
             session: false
         }, (err, user, info) => {
@@ -141,7 +161,17 @@ module.exports = {
     },
     authenticateRole(allowedRoles, req, res, next) {
         const token = getToken(req.headers);
-        const decode = jwt.verify(token, constants.SALT);
+        const decode = jwt.verify(token, constants.SALT, (err) => {
+            res.status(403).send({
+                name: err.name,
+                errors: [{
+                    message: err.message,
+                    expiredAt: err.expiredAt
+                }],
+            });
+        });
+
+        if (!decode) return;
 
         if (!allowedRoles.includes(decode.roles[0].roleName)) return res.status(403).send({
             name: 'Unauthorized',

@@ -18,7 +18,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       businessNumber: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique:true
       },
       isCompany: {
         type: Sequelize.BOOLEAN
@@ -33,7 +34,7 @@ module.exports = {
       }
     });
   },
-  down: (queryInterface, Sequelize) => {
+  down: (queryInterface) => {
     return queryInterface.dropTable('companies');
   }
 };
