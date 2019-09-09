@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     symbol: DataTypes.STRING,
     code: DataTypes.STRING,
-    number: DataTypes.INTEGER
+    number: DataTypes.STRING
   }, {});
   currency.associate = function(models) {
     // associations can be defined here

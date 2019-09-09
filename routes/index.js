@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authController = require('../controllers/authController');
+const companyController = require('../controllers/companyController');
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -11,5 +12,6 @@ router.get('/', function (req, res) {
 /* Auth router */
 router.post('/register', authController.register);
 router.post('/login', authController.login);
+router.post('/register/:id/company',companyController.register);
 
 module.exports = router;
