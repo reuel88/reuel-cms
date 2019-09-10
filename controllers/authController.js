@@ -52,6 +52,7 @@ module.exports = {
                 })
             ])
                 .then(response => {
+
                     /**
                      * May want to generate the user settings here.
                      */
@@ -90,7 +91,7 @@ module.exports = {
                 if (!user) return res.status(401).send({
                     name: 'Unauthorized',
                     errors: [{
-                        message: 'Authentication failed.'
+                        message: 'Authentication failed'
                     }]
                 });
 
@@ -98,7 +99,7 @@ module.exports = {
                     if (!(isMatch && !err)) return res.status(401).send({
                         name: 'Unauthorized',
                         errors: [{
-                            message: 'Authentication failed.'
+                            message: 'Authentication failed'
                         }]
                     });
 
@@ -116,6 +117,15 @@ module.exports = {
             .catch(error => res.status(400).send(error));
     },
     forgotPassword(req, res) {
+        if (!req.body.email) {
+            return res.status(400).send({
+                name: 'Error',
+                errors: [{
+                    message: 'Email missing'
+                }]
+            });
+        }
+
         return userModel
             .findOne({
                 where: {
@@ -123,19 +133,93 @@ module.exports = {
                 }
             })
             .then(user => {
+
+                // TODO: il8n
+
+                if (!user) return res.status(200).send({
+                    name: 'Password Reset',
+                    errors: [{
+                        title: 'Password Reset',
+                        message: `Email send to ${req.body.email}`
+                    }]
+                });
+
+
                 const token = jwt.sign(JSON.parse(JSON.stringify({userId: user.id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
 
                 user
                     .update({
-                        token: token
+                        forgotPasswordToken: token
                     })
-                    .then()
+                    .then(() => {
+                        res.status(200).send({
+                            name: 'Password Reset',
+                            errors: [{
+                                title: 'Password Reset',
+                                message: `Email send to ${req.body.email}`
+                            }]
+                        });
+                    })
                     .catch(error => res.status(400).send(error));
             })
             .catch(error => res.status(400).send(error));
     },
     resetPassword(req, res) {
+        const token = req.query.t;
+        const decode = jwt.verify(token, constants.SALT, (err) => {
+            res.status(403).send({
+                name: err.name,
+                errors: [{
+                    message: err.message,
+                    expiredAt: err.expiredAt
+                }],
+            });
+        });
 
+        if (!decode) return;
+
+        if (!req.body.password || !req.body.rePassword) {
+            return res.status(400).send({
+                name: 'Error',
+                errors: [{
+                    message: 'Passwords missing'
+                }]
+            });
+        }
+
+        if(req.body.password !== req.body.rePassword){
+            return res.status(400).send({
+                name: 'Error',
+                errors: [{
+                    message: 'Passwords do not match'
+                }]
+            });
+        }
+
+        return userModel
+            .findOne({
+                where: {
+                    id: decode.userId,
+                    forgotPasswordToken: token
+                }
+            })
+            .then(user => {
+                if (!user) return res.status(404).send({
+                    name: 'Not found',
+                    errors: [{
+                        message: 'User Not Found'
+                    }]
+                });
+
+                user
+                    .update({
+                        forgotPasswordToken: null,
+                        password: req.body.password,
+                    })
+                    .then(() => res.status(200).send(user))
+                    .catch(error => res.status(400).send(error));
+            })
+            .catch(error => res.status(400).send(error));
     },
     authenticateToken(req, res, next) {
         return passport.authenticate("jwt", {
@@ -176,7 +260,7 @@ module.exports = {
         if (!allowedRoles.includes(decode.roles[0].roleName)) return res.status(403).send({
             name: 'Unauthorized',
             errors: [{
-                message: 'user unauthorized'
+                message: 'User unauthorized'
             }]
         });
 

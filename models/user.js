@@ -8,17 +8,24 @@ module.exports = (sequelize, DataTypes) => {
         email: {
             type: DataTypes.STRING,
             unique: true,
-            allowNull: false,
-            validate:{
+            allowNull: false, // null is not the same as empty
+            validate: {
                 isEmail: true,
             }
         },
-        password: DataTypes.STRING,
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         status: {
             type: DataTypes.STRING,
             allowNull: false,
-            defaultValue: 'active'
+            defaultValue: 'active',
+            validate: {
+                isIn: [['active', 'inactive', 'archive']]
+            }
         },
+        forgotPasswordToken: DataTypes.STRING,
         lastLogin: DataTypes.DATE,
     }, {});
 

@@ -18,9 +18,7 @@ module.exports = {
             next();
         });
 
-        console.log('hello');
         if (!decode) return;
-        console.log('world');
 
         return Promise
             .all([

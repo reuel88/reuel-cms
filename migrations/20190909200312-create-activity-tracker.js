@@ -52,6 +52,6 @@ module.exports = {
     });
   },
   down: (queryInterface) => {
-    return queryInterface.dropTable('activity-trackers');
+    return queryInterface.dropTable('activityTrackers');
   }
 };
