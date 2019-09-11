@@ -25,8 +25,6 @@ function getToken(headers) {
 module.exports = {
     async register(req, res, next) {
         /**
-         * Need to change up the registration for this if I include organisation based structure
-         *
          * 1. Ask for email and password
          *      - generate email to confirm email
          *      - add to marketing workflow
@@ -68,7 +66,7 @@ module.exports = {
                         roleId: response[1].id
                     })
                     .then(() => {
-                        const token = jwt.sign(JSON.parse(JSON.stringify({userId: response[0].id})), constants.SALT, {expiresIn: 30}); // 30 days
+                        const token = jwt.sign(JSON.parse(JSON.stringify({userId: response[0].id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
 
                         res.status(201).send({redirect: `/register/company?t=${token}`});
                         next();
