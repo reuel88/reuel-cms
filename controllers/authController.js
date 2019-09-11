@@ -1,4 +1,6 @@
+const _map = require('lodash').map;
 const jwt = require('jsonwebtoken');
+const {Validator} = require('node-input-validator');
 const passport = require('../config/passport');
 const constants = require('../config/constants');
 const roles = require('../config/roles');
@@ -32,14 +34,36 @@ module.exports = {
          * 3. Ask for integration details
          */
 
-        if (!req.body.email || !req.body.password) {
-            return res.status(400).send({
-                name: 'Error',
-                errors: [{
-                    message: 'Email and/or Password are missing'
-                }]
-            });
-        } else {
+        const validator = new Validator(req.body, {
+            email: 'required|email',
+            password: 'required'
+        });
+
+
+        return validator.check().then(matched => {
+            const errors = {
+                name: 'NodeInputValidatorError',
+                errors: _map(validator.errors, (value, key) => {
+                    return {
+                        message: value.message, // message
+                        type: value.rule, // rule
+                        path: key, // key
+                        value: validator.inputs[key]
+                    };
+                })
+            };
+
+            res.status(400).send(errors);
+        });
+
+        // if (!req.body.email || !req.body.password) {
+        //     return res.status(400).send({
+        //         name: 'Error',
+        //         errors: [{
+        //             message: 'Email and/or Password are missing'
+        //         }]
+        //     });
+        // } else {
             return Promise.all([
                 userModel.create({
                     email: req.body.email,
@@ -70,7 +94,7 @@ module.exports = {
                         .catch(error => res.status(400).send(error));
                 })
                 .catch(error => res.status(400).send(error));
-        }
+        // }
     },
     login(req, res) {
         return userModel
@@ -187,7 +211,7 @@ module.exports = {
             });
         }
 
-        if(req.body.password !== req.body.rePassword){
+        if (req.body.password !== req.body.rePassword) {
             return res.status(400).send({
                 name: 'Error',
                 errors: [{

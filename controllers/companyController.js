@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const constants = require('../config/constants');
 const companyModel = require('../models').company;
 const userModel = require('../models').user;
+const userCompanyModel = require('../models').userCompany;
 
 module.exports = {
     register(req, res, next) {
@@ -40,8 +41,9 @@ module.exports = {
                     }]
                 });
 
-                user
-                    .update({
+                userCompanyModel
+                    .create({
+                        userId: user.id,
                         companyId: company.id
                     })
                     .then(() => {
