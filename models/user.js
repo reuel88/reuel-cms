@@ -9,12 +9,16 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
             allowNull: false, // null is not the same as empty
             validate: {
+                notEmpty: true,
                 isEmail: true,
             }
         },
         password: {
             type: DataTypes.STRING,
             allowNull: false,
+            validate: {
+                notEmpty: true,
+            }
         },
         status: {
             type: DataTypes.STRING,

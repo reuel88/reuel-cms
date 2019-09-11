@@ -1,8 +1,9 @@
-const _map = require('lodash').map;
 const jwt = require('jsonwebtoken');
 const {Validator} = require('node-input-validator');
 const passport = require('../config/passport');
 const constants = require('../config/constants');
+const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
+const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
 const roles = require('../config/roles');
 const roleModel = require('../models').role;
 const userModel = require('../models').user;
@@ -22,7 +23,7 @@ function getToken(headers) {
 }
 
 module.exports = {
-    register(req, res) {
+    async register(req, res, next) {
         /**
          * Need to change up the registration for this if I include organisation based structure
          *
@@ -39,65 +40,55 @@ module.exports = {
             password: 'required'
         });
 
+        const isValid = await validator.check();
 
-        return validator.check().then(matched => {
-            const errors = {
-                name: 'NodeInputValidatorError',
-                errors: _map(validator.errors, (value, key) => {
-                    return {
-                        message: value.message, // message
-                        type: value.rule, // rule
-                        path: key, // key
-                        value: validator.inputs[key]
-                    };
-                })
-            };
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
 
-            res.status(400).send(errors);
+
+        Promise.all([
+            userModel.create({
+                email: req.body.email,
+                password: req.body.password,
+            }),
+            roleModel.findOne({
+                where: {
+                    roleName: roles.USER,
+                }
+            })
+        ])
+            .then(response => {
+
+                /**
+                 * May want to generate the user settings here. And add to a marketing workflow
+                 */
+
+                userRoleModel
+                    .create({
+                        userId: response[0].id,
+                        roleId: response[1].id
+                    })
+                    .then(() => {
+                        const token = jwt.sign(JSON.parse(JSON.stringify({userId: response[0].id})), constants.SALT, {expiresIn: 30}); // 30 days
+
+                        res.status(201).send({redirect: `/register/company?t=${token}`});
+                        next();
+                    })
+                    .catch(error => res.status(400).send(error));
+            })
+            .catch(error => res.status(400).send(error));
+
+    },
+    async login(req, res) {
+        const validator = new Validator(req.body, {
+            email: 'required|email',
+            password: 'required'
         });
 
-        // if (!req.body.email || !req.body.password) {
-        //     return res.status(400).send({
-        //         name: 'Error',
-        //         errors: [{
-        //             message: 'Email and/or Password are missing'
-        //         }]
-        //     });
-        // } else {
-            return Promise.all([
-                userModel.create({
-                    email: req.body.email,
-                    password: req.body.password,
-                }),
-                roleModel.findOne({
-                    where: {
-                        roleName: roles.USER,
-                    }
-                })
-            ])
-                .then(response => {
+        const isValid = await validator.check();
 
-                    /**
-                     * May want to generate the user settings here.
-                     */
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator));
 
-                    userRoleModel
-                        .create({
-                            userId: response[0].id,
-                            roleId: response[1].id
-                        })
-                        .then(() => {
-                            const token = jwt.sign(JSON.parse(JSON.stringify({userId: response[0].id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
-
-                            res.status(201).send({redirect: `/register/company?t=${token}`});
-                        })
-                        .catch(error => res.status(400).send(error));
-                })
-                .catch(error => res.status(400).send(error));
-        // }
-    },
-    login(req, res) {
-        return userModel
+        userModel
             .findOne({
                 where: {
                     email: req.body.email,
@@ -140,15 +131,15 @@ module.exports = {
             })
             .catch(error => res.status(400).send(error));
     },
-    forgotPassword(req, res) {
-        if (!req.body.email) {
-            return res.status(400).send({
-                name: 'Error',
-                errors: [{
-                    message: 'Email missing'
-                }]
-            });
-        }
+    async forgotPassword(req, res) {
+        const validator = new Validator(req.body, {
+            email: 'required|email'
+        });
+
+        const isValid = await validator.check();
+
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator));
+
 
         return userModel
             .findOne({
@@ -162,7 +153,7 @@ module.exports = {
 
                 if (!user) return res.status(200).send({
                     name: 'Password Reset',
-                    errors: [{
+                    successes: [{
                         title: 'Password Reset',
                         message: `Email send to ${req.body.email}`
                     }]
@@ -178,7 +169,7 @@ module.exports = {
                     .then(() => {
                         res.status(200).send({
                             name: 'Password Reset',
-                            errors: [{
+                            successes: [{
                                 title: 'Password Reset',
                                 message: `Email send to ${req.body.email}`
                             }]
@@ -188,62 +179,45 @@ module.exports = {
             })
             .catch(error => res.status(400).send(error));
     },
-    resetPassword(req, res) {
-        const token = req.query.t;
-        const decode = jwt.verify(token, constants.SALT, (err) => {
-            res.status(403).send({
-                name: err.name,
-                errors: [{
-                    message: err.message,
-                    expiredAt: err.expiredAt
-                }],
-            });
+    async resetPassword(req, res) {
+        const validator = new Validator(req.body, {
+            password: 'required|same:confirmPassword',
         });
 
-        if (!decode) return;
+        const isValid = await validator.check();
 
-        if (!req.body.password || !req.body.rePassword) {
-            return res.status(400).send({
-                name: 'Error',
-                errors: [{
-                    message: 'Passwords missing'
-                }]
-            });
-        }
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator));
 
-        if (req.body.password !== req.body.rePassword) {
-            return res.status(400).send({
-                name: 'Error',
-                errors: [{
-                    message: 'Passwords do not match'
-                }]
-            });
-        }
+        const token = req.query.t;
+        return jwt.verify(token, constants.SALT, (err, decode) => {
+            if (err) return res.status(403).send(jsonWebTokenHelper.formatErrors(err));
 
-        return userModel
-            .findOne({
-                where: {
-                    id: decode.userId,
-                    forgotPasswordToken: token
-                }
-            })
-            .then(user => {
-                if (!user) return res.status(404).send({
-                    name: 'Not found',
-                    errors: [{
-                        message: 'User Not Found'
-                    }]
-                });
+            return userModel
+                .findOne({
+                    where: {
+                        id: decode.userId,
+                        forgotPasswordToken: token
+                    }
+                })
+                .then(user => {
+                    if (!user) return res.status(404).send({
+                        name: 'Not found',
+                        errors: [{
+                            message: 'User Not Found'
+                        }]
+                    });
 
-                user
-                    .update({
-                        forgotPasswordToken: null,
-                        password: req.body.password,
-                    })
-                    .then(() => res.status(200).send(user))
-                    .catch(error => res.status(400).send(error));
-            })
-            .catch(error => res.status(400).send(error));
+                    user
+                        .update({
+                            forgotPasswordToken: null,
+                            password: req.body.password,
+                        })
+                        .then(() => res.status(200).send(user))
+                        .catch(error => res.status(400).send(error));
+                })
+                .catch(error => res.status(400).send(error));
+        });
+
     },
     authenticateToken(req, res, next) {
         return passport.authenticate("jwt", {
@@ -269,25 +243,20 @@ module.exports = {
     },
     authenticateRole(allowedRoles, req, res, next) {
         const token = getToken(req.headers);
-        const decode = jwt.verify(token, constants.SALT, (err) => {
-            res.status(403).send({
-                name: err.name,
-                errors: [{
-                    message: err.message,
-                    expiredAt: err.expiredAt
-                }],
-            });
+        jwt.verify(token, constants.SALT, (err, decode) => {
+            if (err)
+                return res.status(403).send(jsonWebTokenHelper.formatErrors(err));
+
+            if (!allowedRoles.includes(decode.roles[0].roleName))
+                return res.status(403).send({
+                    name: 'Unauthorized',
+                    errors: [{
+                        message: 'User unauthorized'
+                    }]
+                });
+
+            next();
         });
-
-        if (!decode) return;
-
-        if (!allowedRoles.includes(decode.roles[0].roleName)) return res.status(403).send({
-            name: 'Unauthorized',
-            errors: [{
-                message: 'User unauthorized'
-            }]
-        });
-
-        next();
     }
-};
+}
+;

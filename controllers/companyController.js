@@ -1,66 +1,59 @@
 const jwt = require('jsonwebtoken');
 const constants = require('../config/constants');
+const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
 const companyModel = require('../models').company;
 const userModel = require('../models').user;
 const userCompanyModel = require('../models').userCompany;
 
 module.exports = {
-    register(req, res, next) {
+    register(req, res) {
         const token = req.query.t;
-        const decode = jwt.verify(token, constants.SALT, (err) => {
-            res.status(403).send({
-                name: err.name,
-                errors: [{
-                    message: err.message,
-                    expiredAt: err.expiredAt
-                }],
-            });
+        return jwt.verify(token, constants.SALT, (err, decode) => {
 
-            next();
-        });
+            if (err) return res.status(403).send(jsonWebTokenHelper.formatErrors(err));
 
-        if (!decode) return;
-
-        return Promise
-            .all([
-                userModel.findByPk(decode.userId),
-                companyModel.create({
-                    fullName: req.body.fullName,
-                    businessNumber: req.body.businessNumber,
-                    isCompany: req.body.isCompany
-                })
-            ])
-            .then(response => {
-                const user = response[0];
-                const company = response[1];
-
-                if (!user) return res.status(404).send({
-                    name: 'Not found',
-                    errors: [{
-                        message: 'User Not Found'
-                    }]
-                });
-
-                userCompanyModel
-                    .create({
-                        userId: user.id,
-                        companyId: company.id
+            return Promise
+                .all([
+                    userModel.findByPk(decode.userId),
+                    companyModel.create({
+                        fullName: req.body.fullName,
+                        businessNumber: req.body.businessNumber,
+                        isCompany: req.body.isCompany
                     })
-                    .then(() => {
-                        const token = jwt.sign(JSON.parse(JSON.stringify({
+                ])
+                .then(response => {
+                    const user = response[0];
+                    const company = response[1];
+
+                    if (!user) return res.status(404).send({
+                        name: 'Not found',
+                        errors: [{
+                            message: 'User Not Found'
+                        }]
+                    });
+
+                    userCompanyModel
+                        .create({
                             userId: user.id,
                             companyId: company.id
-                        })), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
+                        })
+                        .then(() => {
+                            const token = jwt.sign(JSON.parse(JSON.stringify({
+                                userId: user.id,
+                                companyId: company.id
+                            })), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
 
-                        res.status(201).send({
-                            redirect: `/register/company/integration?t=${token}`
+                            res.status(201).send({
+                                redirect: `/register/company/integration?t=${token}`
+                            });
                         });
-                    });
-            })
-            .catch(error => {
-                //TODO: Handle this better
-                res.status(400).send(error)
-            });
+                })
+                .catch(error => {
+                    //TODO: Handle this better
+                    res.status(400).send(error)
+                });
+
+        });
     },
     list(req, res) {
         let limit = req.query.limit || 10;
