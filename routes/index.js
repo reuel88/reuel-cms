@@ -12,11 +12,9 @@ router.get('/', function (req, res) {
 
 /* Auth router */
 router.post('/register', authController.register, activityTrackerMiddleware);
-router.post('/login', authController.login);
-router.post('/forgot-password', authController.forgotPassword);
-router.post('/reset-password', authController.resetPassword);
-router.post('/register/company', companyController.register, (req, res) => {
-    console.log(res.statusCode);
-});
+router.post('/login', authController.login, activityTrackerMiddleware);
+router.post('/forgot-password', authController.forgotPassword, activityTrackerMiddleware);
+router.post('/reset-password', authController.resetPassword, activityTrackerMiddleware);
+router.post('/register/company', companyController.register, activityTrackerMiddleware);
 
 module.exports = router;
