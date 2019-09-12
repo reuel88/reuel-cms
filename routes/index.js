@@ -3,6 +3,7 @@ const router = express.Router();
 
 const authController = require('../controllers/authController');
 const companyController = require('../controllers/companyController');
+const activityTrackerMiddleware = require('../middlewares/activityTrackerMiddleware');
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -10,9 +11,7 @@ router.get('/', function (req, res) {
 });
 
 /* Auth router */
-router.post('/register', authController.register, (req, res) => {
-    console.log('hello', res.statusCode);
-});
+router.post('/register', authController.register, activityTrackerMiddleware);
 router.post('/login', authController.login);
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);

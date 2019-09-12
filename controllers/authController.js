@@ -256,5 +256,4 @@ module.exports = {
             next();
         });
     }
-}
-;
+};
