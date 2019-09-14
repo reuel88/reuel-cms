@@ -21,7 +21,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       headers: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       body: {
         type: Sequelize.STRING

@@ -2,6 +2,9 @@ const activityTrackerModel = require('../models').activityTracker;
 
 module.exports = (req, res) => {
     // TODO: Parse sensitive data
+
+    console.log(JSON.stringify(req.headers));
+
     activityTrackerModel.create({
         // userId:,
         // companyId:,
