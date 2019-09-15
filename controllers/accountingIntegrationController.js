@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const constants = require('../config/constants');
 const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
 const accountingIntegrationModel = require('../models').accountingIntegration;
+const accountingTypeModel = require('../models').accountingType;
 
 
 module.exports = {
@@ -11,15 +12,35 @@ module.exports = {
 
             if (err) return res.status(403).send(jsonWebTokenHelper.formatErrors(err));
 
-            return accountingIntegrationModel
-                .create({
-                    companyId: decode.companyId,
-                    // accountingTypeId:,
-                })
+            return Promise
+                .all([
+                    accountingTypeModel.findOne({
+                        where: {
+                            name: req.body.accountingType
+                        }
+                    }),
+                ])
                 .then(response => {
-                    res.status(201).send({
-                        redirect: `/login`
+                    const accountingType = response[0];
+
+                    if(!accountingType) res.status(404).send({
+                        name: 'Not found',
+                        errors: [{
+                            message: 'Accounting Type Not Found'
+                        }]
                     });
+
+                    return accountingIntegrationModel
+                        .create({
+                            companyId: decode.companyId,
+                            accountingTypeId: accountingType.id,
+                        })
+                        .then(response => {
+                            res.status(201).send({
+                                redirect: `/login`
+                            });
+                        })
+                        .catch(error => res.status(400).send(error));
                 })
                 .catch(error => res.status(400).send(error));
         });
