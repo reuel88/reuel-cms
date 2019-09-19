@@ -1,16 +1,36 @@
 const jwt = require('jsonwebtoken');
+const {Validator} = require('node-input-validator');
 const constants = require('../config/constants');
+const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
 const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
 const companyModel = require('../models').company;
 const userModel = require('../models').user;
 const userCompanyModel = require('../models').userCompany;
 
 module.exports = {
-    register(req, res) {
+     register(req, res) {
         const token = req.query.t;
-        return jwt.verify(token, constants.SALT, (err, decode) => {
+        return jwt.verify(token, constants.SALT, async (err, decode) => {
 
             if (err) return res.status(403).send(jsonWebTokenHelper.formatErrors(err));
+
+            const tokenValidator = new Validator(decode, {
+                userId:'required',
+            });
+
+            const isTokenValid = await tokenValidator.check();
+
+            if (!isTokenValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(tokenValidator)) && next();
+
+            const validator = new Validator(req.body, {
+                fullName: 'requiredIf:isCompany,true',
+                firstName: 'requiredIf:isCompany,false',
+                lastName: 'requiredIf:isCompany,false',
+            });
+
+            const isValid = await validator.check();
+
+            if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
 
             return Promise
                 .all([

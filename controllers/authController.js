@@ -42,7 +42,6 @@ module.exports = {
 
         if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
 
-
         Promise.all([
             userModel.create({
                 email: req.body.email,
@@ -55,7 +54,6 @@ module.exports = {
             })
         ])
             .then(response => {
-
                 /**
                  * May want to generate the user settings here. And add to a marketing workflow
                  */
@@ -68,17 +66,17 @@ module.exports = {
                     .then(() => {
                         const token = jwt.sign(JSON.parse(JSON.stringify({userId: response[0].id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
 
-                        setTimeout(() =>{
+                        setTimeout(() => {
                             res.status(201).send({redirect: `/register/company?t=${token}`});
                             next();
                         }, 2000);
                     })
-                    .catch(error => res.status(400).send(error));
+                    .catch(error => res.status(400).send(error) && next());
             })
-            .catch(error => res.status(400).send(error));
+            .catch(error => res.status(400).send(error) && next());
 
     },
-    async login(req, res) {
+    async login(req, res, next) {
         const validator = new Validator(req.body, {
             email: 'required|email',
             password: 'required'
@@ -86,7 +84,7 @@ module.exports = {
 
         const isValid = await validator.check();
 
-        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator));
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
 
         userModel
             .findOne({
@@ -108,7 +106,7 @@ module.exports = {
                     errors: [{
                         message: 'Authentication failed'
                     }]
-                });
+                }) && next();
 
                 user.comparePassword(req.body.password, (err, isMatch) => {
                     if (!(isMatch && !err)) return res.status(401).send({
@@ -116,7 +114,7 @@ module.exports = {
                         errors: [{
                             message: 'Authentication failed'
                         }]
-                    });
+                    }) && next();
 
                     user
                         .update({
@@ -127,27 +125,27 @@ module.exports = {
                             return res.status(200).send({
                                 token: `JWT ${token}`,
                                 redirect: '/dashboard'
-                            })
+                            }) && next();
                         })
-                        .catch(error => res.status(400).send(error));
+                        .catch(error => res.status(400).send(error) && next());
                 });
             })
-            .catch(error => res.status(400).send(error));
+            .catch(error => res.status(400).send(error) && next());
     },
-    logout(req, res, next){
+    logout(req, res, next) {
         res.status(200).send({
             redirect: '/login'
         });
         next();
     },
-    async forgotPassword(req, res) {
+    async forgotPassword(req, res, next) {
         const validator = new Validator(req.body, {
             email: 'required|email'
         });
 
         const isValid = await validator.check();
 
-        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator));
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
 
         return userModel
             .findOne({
@@ -161,11 +159,12 @@ module.exports = {
 
                 if (!user) return res.status(200).send({
                     name: 'Password Reset',
-                    successes: [{
+                    messages: [{
                         title: 'Password Reset',
                         message: `Email send to ${req.body.email}`
-                    }]
-                });
+                    }],
+                    redirect: '/'
+                }) && next();
 
 
                 const token = jwt.sign(JSON.parse(JSON.stringify({userId: user.id})), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
@@ -177,28 +176,29 @@ module.exports = {
                     .then(() => {
                         res.status(200).send({
                             name: 'Password Reset',
-                            successes: [{
+                            messages: [{
                                 title: 'Password Reset',
                                 message: `Email send to ${req.body.email}`
-                            }]
-                        });
+                            }],
+                            redirect: '/'
+                        }) && next();
                     })
-                    .catch(error => res.status(400).send(error));
+                    .catch(error => res.status(400).send(error) && next());
             })
-            .catch(error => res.status(400).send(error));
+            .catch(error => res.status(400).send(error) && next());
     },
-    async resetPassword(req, res) {
+    async resetPassword(req, res, next) {
         const validator = new Validator(req.body, {
             password: 'required|same:confirmPassword',
         });
 
         const isValid = await validator.check();
 
-        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator));
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
 
         const token = req.query.t;
         return jwt.verify(token, constants.SALT, (err, decode) => {
-            if (err) return res.status(403).send(jsonWebTokenHelper.formatErrors(err));
+            if (err) return res.status(403).send(jsonWebTokenHelper.formatErrors(err)) && next();
 
             return userModel
                 .findOne({
@@ -213,17 +213,17 @@ module.exports = {
                         errors: [{
                             message: 'User Not Found'
                         }]
-                    });
+                    }) && next();
 
                     user
                         .update({
                             forgotPasswordToken: null,
                             password: req.body.password,
                         })
-                        .then(() => res.status(200).send(user))
-                        .catch(error => res.status(400).send(error));
+                        .then(() => res.status(200).send(user) && next())
+                        .catch(error => res.status(400).send(error) && next());
                 })
-                .catch(error => res.status(400).send(error));
+                .catch(error => res.status(400).send(error) && next());
         });
 
     },
