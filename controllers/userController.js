@@ -4,6 +4,7 @@ const profileModel = require('../models').profile;
 const roleModel = require('../models').role;
 const userRoleModel = require('../models').userRole;
 const userSettingModel = require('../models').userSetting;
+const companyModel = require('../models').company;
 
 module.exports = {
     list(req, res) {
@@ -29,6 +30,9 @@ module.exports = {
                         }, {
                             model: userSettingModel,
                             as: 'userSettings'
+                        }, {
+                            model: companyModel,
+                            as: 'companies'
                         }],
                         limit: limit,
                         offset: offset,
@@ -60,6 +64,9 @@ module.exports = {
                 }, {
                     model: userSettingModel,
                     as: 'userSettings'
+                }, {
+                    model: companyModel,
+                    as: 'companies'
                 }]
             })
             .then(user => {
@@ -125,6 +132,9 @@ module.exports = {
                 }, {
                     model: userSettingModel,
                     as: 'userSettings'
+                }, {
+                    model: companyModel,
+                    as: 'companies'
                 }]
             })
             .then(user => {

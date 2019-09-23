@@ -1,12 +1,11 @@
+const _get = require('lodash').get;
 const activityTrackerModel = require('../models').activityTracker;
 
 module.exports = (req, res) => {
     // TODO: Parse sensitive data
 
-    console.log(JSON.stringify(req.headers));
-
     activityTrackerModel.create({
-        // userId:,
+        userId: _get(req,'user.id', null),
         // companyId:,
         statusCode: res.statusCode,
         statusMessage: res.statusMessage,

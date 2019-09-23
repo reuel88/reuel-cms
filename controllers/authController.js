@@ -122,6 +122,7 @@ module.exports = {
                         })
                         .then(() => {
                             const token = jwt.sign(JSON.parse(JSON.stringify(user)), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
+                            req.user = user;
                             return res.status(200).send({
                                 token: `JWT ${token}`,
                                 redirect: '/dashboard'
@@ -133,10 +134,9 @@ module.exports = {
             .catch(error => res.status(400).send(error) && next());
     },
     logout(req, res, next) {
-        res.status(200).send({
+        return res.status(200).send({
             redirect: '/login'
-        });
-        next();
+        }) && next();
     },
     async forgotPassword(req, res, next) {
         const validator = new Validator(req.body, {
@@ -232,7 +232,7 @@ module.exports = {
             session: false
         }, (err, user, info) => {
             if (err) {
-                console.log(err, info);
+                console.error(err, info);
                 return next(err);
             }
 
