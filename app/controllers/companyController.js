@@ -3,9 +3,9 @@ const {Validator} = require('node-input-validator');
 const constants = require('../config/constants');
 const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
 const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
-const companyModel = require('../models').company;
-const userModel = require('../models').user;
-const userCompanyModel = require('../models').userCompany;
+const companyModel = require('../../models').company;
+const userModel = require('../../models').user;
+const userCompanyModel = require('../../models').userCompany;
 
 module.exports = {
      register(req, res) {

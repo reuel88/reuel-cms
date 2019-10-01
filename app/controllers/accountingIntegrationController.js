@@ -3,8 +3,8 @@ const {Validator} = require('node-input-validator');
 const constants = require('../config/constants');
 const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
 const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
-const accountingIntegrationModel = require('../models').accountingIntegration;
-const accountingTypeModel = require('../models').accountingType;
+const accountingIntegrationModel = require('../../models').accountingIntegration;
+const accountingTypeModel = require('../../models').accountingType;
 
 
 module.exports = {
@@ -54,7 +54,7 @@ module.exports = {
                             companyId: decode.companyId,
                             accountingTypeId: accountingType.id,
                         })
-                        .then(response => {
+                        .then(() => {
                             res.status(201).send({
                                 redirect: `/login`
                             });

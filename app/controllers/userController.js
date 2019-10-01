@@ -1,10 +1,10 @@
 const roles = require('../config/roles');
-const userModel = require('../models').user;
-const profileModel = require('../models').profile;
-const roleModel = require('../models').role;
-const userRoleModel = require('../models').userRole;
-const userSettingModel = require('../models').userSetting;
-const companyModel = require('../models').company;
+const userModel = require('../../models').user;
+const profileModel = require('../../models').profile;
+const roleModel = require('../../models').role;
+const userRoleModel = require('../../models').userRole;
+const userSettingModel = require('../../models').userSetting;
+const companyModel = require('../../models').company;
 
 module.exports = {
     list(req, res) {

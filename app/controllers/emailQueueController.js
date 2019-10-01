@@ -1,4 +1,4 @@
-const emailQueueModel = require('../models').emailQueue;
+const emailQueueModel = require('../../models').emailQueue;
 
 module.exports = {
     list(req, res) {

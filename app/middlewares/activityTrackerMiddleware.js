@@ -1,5 +1,5 @@
 const _get = require('lodash').get;
-const activityTrackerModel = require('../models').activityTracker;
+const activityTrackerModel = require('../../models').activityTracker;
 
 module.exports = (req, res) => {
     // TODO: Parse sensitive data

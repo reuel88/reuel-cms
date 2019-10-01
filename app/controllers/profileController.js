@@ -1,5 +1,5 @@
-const userModal = require('../models').user;
-const profileModel = require('../models').profile;
+const userModal = require('../../models').user;
+const profileModel = require('../../models').profile;
 
 module.exports = {
     list(req, res) {

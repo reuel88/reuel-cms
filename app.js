@@ -5,10 +5,10 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 // const passport = require('./config/passport');
-const authController = require('./controllers/authController');
+const authController = require('./app/controllers/authController');
 
-const indexRouter = require('./routes/index');
-const apiRouter = require('./routes/api');
+const indexRouter = require('./app/routes/index');
+const apiRouter = require('./app/routes/api');
 
 const app = express();
 

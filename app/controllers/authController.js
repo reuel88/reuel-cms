@@ -5,9 +5,9 @@ const constants = require('../config/constants');
 const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
 const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
 const roles = require('../config/roles');
-const roleModel = require('../models').role;
-const userModel = require('../models').user;
-const userRoleModel = require('../models').userRole;
+const roleModel = require('../../models').role;
+const userModel = require('../../models').user;
+const userRoleModel = require('../../models').userRole;
 
 function getToken(headers) {
     if (headers && headers.authorization) {
