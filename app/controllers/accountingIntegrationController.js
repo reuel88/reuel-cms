@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const {Validator} = require('node-input-validator');
-const constants = require('../config/constants');
+const constants = require('../../config/constants');
 const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
 const jsonWebTokenHelper = require("../helpers/jsonWebTokenHelper");
 const accountingIntegrationModel = require('../../models').accountingIntegration;

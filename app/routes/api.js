@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const roles = require('../config/roles');
+const roles = require('../../config/roles');
 const profileController = require('../controllers/profileController');
 const roleController = require('../controllers/roleController');
 const userController = require('../controllers/userController');

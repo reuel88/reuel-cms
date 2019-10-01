@@ -1,4 +1,4 @@
-const roles = require('../config/roles');
+const roles = require('../../config/roles');
 const userModel = require('../../models').user;
 const profileModel = require('../../models').profile;
 const roleModel = require('../../models').role;

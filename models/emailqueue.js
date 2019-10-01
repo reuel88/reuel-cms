@@ -1,6 +1,6 @@
 'use strict';
 
-const constants = require('../app/config/constants');
+const constants = require('../config/constants');
 
 module.exports = (sequelize, DataTypes) => {
     const emailQueue = sequelize.define('emailQueue', {

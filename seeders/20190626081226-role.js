@@ -1,5 +1,5 @@
 'use strict';
-const roles = require('../app/config/roles');
+const roles = require('../config/roles');
 
 module.exports = {
     up: (queryInterface) => {
