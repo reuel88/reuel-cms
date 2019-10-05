@@ -10,7 +10,12 @@ module.exports = (sequelize, DataTypes) => {
         firstName: DataTypes.STRING,
         lastName: DataTypes.STRING,
         birthDate: DataTypes.DATE,
-        sex: DataTypes.STRING
+        sex: {
+            type:DataTypes.STRING,
+            validate: {
+                isIn: [['male', 'female', 'other']]
+            }
+        }
     }, {});
 
     profile.associate = function (models) {

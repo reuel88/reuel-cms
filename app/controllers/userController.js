@@ -6,6 +6,15 @@ const userRoleModel = require('../../models').userRole;
 const userSettingModel = require('../../models').userSetting;
 const companyModel = require('../../models').company;
 
+const upsertHelper = (model, association, values) => {
+
+    if (!association) {
+        return model.create(values);
+    }
+
+    return association.update(values);
+};
+
 module.exports = {
     list(req, res) {
         let limit = req.query.limit || 10;
@@ -22,17 +31,8 @@ module.exports = {
                 userModel
                     .findAll({
                         include: [{
-                            model: profileModel,
-                            as: 'profile'
-                        }, {
                             model: roleModel,
                             as: 'roles'
-                        }, {
-                            model: userSettingModel,
-                            as: 'userSettings'
-                        }, {
-                            model: companyModel,
-                            as: 'companies'
                         }],
                         limit: limit,
                         offset: offset,
@@ -54,20 +54,23 @@ module.exports = {
         return userModel
             .findByPk(req.params.id, {
                 attributes: ['email', 'status', 'lastLogin'],
-                include: [{
-                    model: profileModel,
-                    as: 'profile'
-                }, {
-                    model: roleModel,
-                    as: 'roles',
-                    attributes: ['roleName']
-                }, {
-                    model: userSettingModel,
-                    as: 'userSettings'
-                }, {
-                    model: companyModel,
-                    as: 'companies'
-                }]
+                include: [
+                    {
+                        model: profileModel,
+                        as: 'profile',
+                    },
+                    {
+                        model: roleModel,
+                        as: 'roles',
+                        attributes: ['roleName']
+                    }, {
+                        model: userSettingModel,
+                        as: 'userSettings'
+                    }, {
+                        model: companyModel,
+                        as: 'companies'
+                    }
+                ]
             })
             .then(user => {
                 if (!user) return res.status(404).send({
@@ -130,9 +133,6 @@ module.exports = {
                     model: roleModel,
                     as: 'roles'
                 }, {
-                    model: userSettingModel,
-                    as: 'userSettings'
-                }, {
                     model: companyModel,
                     as: 'companies'
                 }]
@@ -145,13 +145,21 @@ module.exports = {
                     }]
                 });
 
-                return user
-                    .update({
+                const calls = [
+                    user.update({
                         email: req.body.email,
                         password: req.body.password,
-                    })
-                    .then(() => res.status(200).send(user))
-                    .catch(error => res.status(400).send(error));
+                    }).catch(error => res.status(400).send(error)),
+                    upsertHelper(profileModel, user.profile, {
+                        userId: user.id,
+                        firstName: req.body[`profile[firstName]`],
+                        lastName: req.body[`profile[lastName]`],
+                    }).catch(error => res.status(400).send(error))
+                ];
+
+                return Promise.all(calls).then(() => {
+                    res.status(200).send(user);
+                }).catch(error => res.status(400).send(error));
             })
             .catch(error => res.status(400).send(error));
     },
@@ -261,17 +269,17 @@ module.exports = {
     },
 
     // Profile ---------------------------------------------------------------------------------------------------------
-    profileList(req, res){
+    profileList(req, res) {
         return profileModel
             .findAll({
-                where:{
+                where: {
                     userId: req.params.id
                 }
             })
             .then(profiles => res.status(200).send(profiles))
             .catch(error => res.status(400).send(error));
     },
-    profileGetById(req,res){
+    profileGetById(req, res) {
         return profileModel
             .findAll({
                 where: {
@@ -286,7 +294,7 @@ module.exports = {
             .then(profile => res.status(200).send(profile))
             .catch(error => res.status(400).send(error));
     },
-    profileAdd(req,res){
+    profileAdd(req, res) {
         return profileModel
             .create({
                 userId: req.params.id,
@@ -299,7 +307,7 @@ module.exports = {
             .then(profile => res.status(200).send(profile))
             .catch(error => res.status(400).send(error));
     },
-    profileUpdate(req,res){
+    profileUpdate(req, res) {
         return profileModel
             .findByPk(req.params.profileId, {
                 include: [{
@@ -329,7 +337,7 @@ module.exports = {
             })
             .catch(error => res.status(400).send(error));
     },
-    profileDelete(req,res){
+    profileDelete(req, res) {
         return profileModel
             .findByPk(req.params.profileId)
             .then(profile => {
