@@ -9,11 +9,20 @@ module.exports = (sequelize, DataTypes) => {
         fullName: DataTypes.STRING,
         firstName: DataTypes.STRING,
         lastName: DataTypes.STRING,
-        birthDate: DataTypes.DATE,
-        sex: {
-            type:DataTypes.STRING,
+        birthDate: {
+            type: DataTypes.DATE,
             validate: {
-                isIn: [['male', 'female', 'other']]
+                isDate: true,
+            }
+        },
+        sex: {
+            type: DataTypes.STRING,
+            validate: {
+                isIn: {
+                    args: [['male','female','other']],
+                    msg: 'Please select a sex'
+                },
+
             }
         }
     }, {});

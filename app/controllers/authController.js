@@ -125,6 +125,7 @@ module.exports = {
                             req.user = user;
                             return res.status(200).send({
                                 token: `JWT ${token}`,
+                                id: user.id,
                                 redirect: '/dashboard'
                             }) && next();
                         })

@@ -1,3 +1,6 @@
+const qs = require('qs');
+const niv = require('node-input-validator');
+const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
 const roles = require('../../config/roles');
 const userModel = require('../../models').user;
 const profileModel = require('../../models').profile;
@@ -123,7 +126,31 @@ module.exports = {
                 .catch(error => res.status(400).send(error));
         }
     },
-    update(req, res) {
+    async update(req, res) {
+        const data = qs.parse(req.body);
+
+        niv.extend('isIn', ({value, args}) => {
+            return args.includes(value);
+        });
+
+        niv.extendMessages({
+            isIn: 'Not a recognized sex'
+        });
+
+        const validator = new niv.Validator({
+            email: data.email,
+            sex: data.profile.sex,
+            birthDate: data.profile.birthDate,
+        }, {
+            email: 'required|email',
+            birthDate: 'dateiso',
+            sex: 'isIn:male,female,other',
+        });
+
+        const isValid = await validator.check();
+
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
+
         return userModel
             .findByPk(req.params.id, {
                 include: [{
@@ -145,15 +172,18 @@ module.exports = {
                     }]
                 });
 
+
                 const calls = [
                     user.update({
-                        email: req.body.email,
-                        password: req.body.password,
+                        email: data.email,
+                        password: data.password,
                     }).catch(error => res.status(400).send(error)),
                     upsertHelper(profileModel, user.profile, {
                         userId: user.id,
-                        firstName: req.body[`profile[firstName]`],
-                        lastName: req.body[`profile[lastName]`],
+                        firstName: data.profile.firstName,
+                        lastName: data.profile.lastName,
+                        sex: data.profile.sex,
+                        birthDate: data.profile.birthDate,
                     }).catch(error => res.status(400).send(error))
                 ];
 
@@ -181,6 +211,18 @@ module.exports = {
 
             })
             .catch(error => res.status(400).send(error));
+    },
+    currentUserId(req, res) {
+        const user = req.user;
+
+        if (!user) return res.status(404).send({
+            name: 'Not found',
+            errors: [{
+                message: 'User Not Found'
+            }]
+        });
+
+        res.status(200).send({id: user.id});
     },
 
     // User Settings ---------------------------------------------------------------------------------------------------

@@ -38,6 +38,8 @@ router.post('/user/', userController.add);
 router.put('/user/:id', userController.update);
 router.delete('/user/:id', GodRole, userController.delete);
 
+router.get('/current-user-id', userController.currentUserId);
+
 router.get('/user/:id/user-setting', userController.userSettingList);
 router.get('/user/:id/user-setting/:userSettingId', userController.userSettingGetById);
 router.post('/user/:id/user-setting', GodRole, userController.userSettingAdd);
