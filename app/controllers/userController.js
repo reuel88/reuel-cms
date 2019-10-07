@@ -1,3 +1,5 @@
+const Sequelize = require('sequelize');
+const _map = require('lodash').map;
 const qs = require('qs');
 const niv = require('node-input-validator');
 const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
@@ -8,6 +10,8 @@ const roleModel = require('../../models').role;
 const userRoleModel = require('../../models').userRole;
 const userSettingModel = require('../../models').userSetting;
 const companyModel = require('../../models').company;
+
+const Op = Sequelize.Op;
 
 const upsertHelper = (model, association, values) => {
 
@@ -23,34 +27,61 @@ module.exports = {
         let limit = req.query.limit || 10;
         let offset = 0;
 
-        return userModel
-            .findAndCountAll()
-            .then(response => {
-                let page = req.query.page;
-                let pages = Math.ceil(response.count / limit);
+        return userModel.findByPk(req.user.id, {
+            include: [
+                {
+                    model: companyModel,
+                    as: 'companies'
+                }
+            ]
+        }).then(user => {
+            const companyIds = _map(user.companies, company => company.id);
 
-                if (page <= pages) offset = limit * (page - 1);
+            userModel
+                .findAndCountAll({
+                    include: [{
+                        model: companyModel,
+                        as: 'companies',
+                        where: {
+                            'id': {[Op.in]: companyIds}
+                        },
+                    }]
+                })
+                .then(response => {
+                    let page = req.query.page;
+                    let pages = Math.ceil(response.count / limit);
 
-                userModel
-                    .findAll({
-                        include: [{
-                            model: roleModel,
-                            as: 'roles'
-                        }],
-                        limit: limit,
-                        offset: offset,
-                    })
-                    .then(users => res.status(200).send(
-                        {
-                            result: users,
-                            count: response.count,
-                            pages: pages
-                        }
-                    ))
-                    .catch(error => res.status(400).send(error));
+                    if (page <= pages) offset = limit * (page - 1);
 
-            })
-            .catch(error => res.status(400).send(error));
+                    userModel
+                        .findAll({
+                            include: [{
+                                model: roleModel,
+                                as: 'roles'
+                            }, {
+                                model: companyModel,
+                                as: 'companies',
+                                where: {
+                                    'id': {[Op.in]: companyIds}
+                                },
+                            }],
+                            limit: limit,
+                            offset: offset,
+                        })
+                        .then(users => res.status(200).send(
+                            {
+                                result: users,
+                                count: response.count,
+                                pages: pages
+                            }
+                        ))
+                        .catch(error => res.status(400).send(error));
+
+                })
+                .catch(error => res.status(400).send(error));
+
+        });
+
 
     },
     getById(req, res) {

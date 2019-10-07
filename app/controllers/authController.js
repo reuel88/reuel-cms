@@ -8,6 +8,7 @@ const roles = require('../../config/roles');
 const roleModel = require('../../models').role;
 const userModel = require('../../models').user;
 const userRoleModel = require('../../models').userRole;
+const companyModel = require('../../models').company;
 
 function getToken(headers) {
     if (headers && headers.authorization) {
@@ -97,6 +98,10 @@ module.exports = {
                         model: roleModel,
                         as: 'roles',
                         attributes: ['roleName']
+                    },
+                    {
+                        model: companyModel,
+                        as: 'companies'
                     }
                 ]
             })
@@ -122,6 +127,7 @@ module.exports = {
                         })
                         .then(() => {
                             const token = jwt.sign(JSON.parse(JSON.stringify(user)), constants.SALT, {expiresIn: 86400 * 30}); // 30 days
+
                             req.user = user;
                             return res.status(200).send({
                                 token: `JWT ${token}`,
