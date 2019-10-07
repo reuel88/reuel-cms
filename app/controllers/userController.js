@@ -28,20 +28,26 @@ module.exports = {
         let offset = 0;
 
         return userModel.findByPk(req.user.id, {
+            attributes: ['id'],
             include: [
                 {
                     model: companyModel,
-                    as: 'companies'
+                    as: 'companies',
+                    attributes: ['id'],
                 }
             ]
         }).then(user => {
             const companyIds = _map(user.companies, company => company.id);
 
+            console.log(companyIds);
+
             userModel
                 .findAndCountAll({
+                    attributes: ['id'],
                     include: [{
                         model: companyModel,
                         as: 'companies',
+                        attributes: ['id'],
                         where: {
                             'id': {[Op.in]: companyIds}
                         },
@@ -55,15 +61,18 @@ module.exports = {
 
                     userModel
                         .findAll({
+                            attributes: ['id', 'email', 'status'],
                             include: [{
                                 model: roleModel,
-                                as: 'roles'
+                                as: 'roles',
+                                attributes: ['roleName'],
                             }, {
                                 model: companyModel,
                                 as: 'companies',
                                 where: {
                                     'id': {[Op.in]: companyIds}
                                 },
+                                attributes: ['id', 'businessNumber', 'fullName', 'isCompany'],
                             }],
                             limit: limit,
                             offset: offset,
