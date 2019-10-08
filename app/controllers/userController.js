@@ -24,8 +24,9 @@ const upsertHelper = (model, association, values) => {
 
 module.exports = {
     list(req, res) {
+        let page = req.query.page || 1;
         let limit = req.query.limit || 10;
-        let offset = 0;
+        let offset = limit * (page - 1);
 
         return userModel.findByPk(req.user.id, {
             attributes: ['id'],
@@ -39,53 +40,26 @@ module.exports = {
         }).then(user => {
             const companyIds = _map(user.companies, company => company.id);
 
-            console.log(companyIds);
-
             userModel
                 .findAndCountAll({
-                    attributes: ['id'],
+                    attributes: ['id', 'email', 'status', 'lastLogin'],
                     include: [{
+                        model: roleModel,
+                        as: 'roles',
+                        attributes: ['roleName'],
+                    }, {
                         model: companyModel,
                         as: 'companies',
-                        attributes: ['id'],
                         where: {
                             'id': {[Op.in]: companyIds}
                         },
-                    }]
+                        attributes: ['id', 'businessNumber', 'fullName', 'isCompany'],
+                    }],
+                    limit: limit,
+                    offset: offset,
                 })
                 .then(response => {
-                    let page = req.query.page;
-                    let pages = Math.ceil(response.count / limit);
-
-                    if (page <= pages) offset = limit * (page - 1);
-
-                    userModel
-                        .findAll({
-                            attributes: ['id', 'email', 'status'],
-                            include: [{
-                                model: roleModel,
-                                as: 'roles',
-                                attributes: ['roleName'],
-                            }, {
-                                model: companyModel,
-                                as: 'companies',
-                                where: {
-                                    'id': {[Op.in]: companyIds}
-                                },
-                                attributes: ['id', 'businessNumber', 'fullName', 'isCompany'],
-                            }],
-                            limit: limit,
-                            offset: offset,
-                        })
-                        .then(users => res.status(200).send(
-                            {
-                                result: users,
-                                count: response.count,
-                                pages: pages
-                            }
-                        ))
-                        .catch(error => res.status(400).send(error));
-
+                    res.status(200).send(response);
                 })
                 .catch(error => res.status(400).send(error));
 
@@ -94,38 +68,59 @@ module.exports = {
 
     },
     getById(req, res) {
-        return userModel
-            .findByPk(req.params.id, {
-                attributes: ['email', 'status', 'lastLogin'],
-                include: [
-                    {
-                        model: profileModel,
-                        as: 'profile',
-                    },
-                    {
-                        model: roleModel,
-                        as: 'roles',
-                        attributes: ['roleName']
-                    }, {
-                        model: userSettingModel,
-                        as: 'userSettings'
-                    }, {
-                        model: companyModel,
-                        as: 'companies'
-                    }
-                ]
-            })
-            .then(user => {
-                if (!user) return res.status(404).send({
-                    name: 'Not found',
-                    errors: [{
-                        message: 'User Not Found'
-                    }]
-                });
 
-                return res.status(200).send(user);
-            })
-            .catch(error => res.status(400).send(error));
+        return userModel.findByPk(req.user.id, {
+            attributes: ['id'],
+            include: [
+                {
+                    model: companyModel,
+                    as: 'companies',
+                    attributes: ['id'],
+                }
+            ]
+        }).then(user => {
+            const companyIds = _map(user.companies, company => company.id);
+
+            userModel
+                .findByPk(req.params.id, {
+                    attributes: ['id','email', 'status', 'lastLogin'],
+                    include: [
+                        {
+                            model: profileModel,
+                            as: 'profile',
+                            attributes: ['id', 'firstName', 'lastName', 'birthDate', 'sex']
+                        },
+                        {
+                            model: roleModel,
+                            as: 'roles',
+                            attributes: ['roleName']
+                        }, {
+                            model: userSettingModel,
+                            as: 'userSettings'
+                        }, {
+                            model: companyModel,
+                            as: 'companies',
+                            where: {
+                                'id': {[Op.in]: companyIds}
+                            },
+                            attributes: ['id', 'businessNumber', 'fullName', 'isCompany'],
+                        }
+                    ]
+                })
+                .then(user => {
+                    if (!user) return res.status(404).send({
+                        name: 'Not found',
+                        errors: [{
+                            message: 'User Not Found'
+                        }]
+                    });
+
+                    return res.status(200).send(user);
+                })
+                .catch(error => res.status(400).send(error));
+
+        });
+
     },
     add(req, res) {
         if (!req.body.email || !req.body.password) {
