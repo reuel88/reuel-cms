@@ -13,7 +13,7 @@ const companyModel = require('../../models').company;
 
 const Op = Sequelize.Op;
 
-const upsertHelper = (model, association, values) => {
+const upCreateHelper = (model, association, values) => {
 
     if (!association) {
         return model.create(values);
@@ -68,7 +68,6 @@ module.exports = {
 
     },
     getById(req, res) {
-
         return userModel.findByPk(req.user.id, {
             attributes: ['id'],
             include: [
@@ -83,7 +82,7 @@ module.exports = {
 
             userModel
                 .findByPk(req.params.id, {
-                    attributes: ['id','email', 'status', 'lastLogin'],
+                    attributes: ['id', 'email', 'status', 'lastLogin'],
                     include: [
                         {
                             model: profileModel,
@@ -207,13 +206,12 @@ module.exports = {
                     }]
                 });
 
-
                 const calls = [
                     user.update({
                         email: data.email,
                         password: data.password,
                     }).catch(error => res.status(400).send(error)),
-                    upsertHelper(profileModel, user.profile, {
+                    upCreateHelper(profileModel, user.profile, {
                         userId: user.id,
                         firstName: data.profile.firstName,
                         lastName: data.profile.lastName,
