@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize');
 const _map = require('lodash').map;
+const _filter = require('lodash').filter;
+const _includes = require('lodash').includes;
 const qs = require('qs');
 const niv = require('node-input-validator');
 const nodeInputValidatorHelper = require("../helpers/nodeInputValidatorHelper");
@@ -10,10 +12,11 @@ const roleModel = require('../../models').role;
 const userRoleModel = require('../../models').userRole;
 const userSettingModel = require('../../models').userSetting;
 const companyModel = require('../../models').company;
+const userCompanyModel = require('../../models').userCompany;
 
 const Op = Sequelize.Op;
 
-const upCreateHelper = (model, association, values) => {
+const updateCreateHelper = (model, association, values) => {
 
     if (!association) {
         return model.create(values);
@@ -62,10 +65,7 @@ module.exports = {
                     res.status(200).send(response);
                 })
                 .catch(error => res.status(400).send(error));
-
         });
-
-
     },
     getById(req, res) {
         return userModel.findByPk(req.user.id, {
@@ -121,19 +121,18 @@ module.exports = {
         });
 
     },
-    add(req, res) {
-        if (!req.body.email || !req.body.password) {
-            return res.status(400).send({
-                name: 'Error',
-                errors: [{
-                    message: 'Email and/or Password are missing'
-                }]
-            });
-        } else {
+    async add(req, res) {
+        const validator = new Validator(req.body, {
+            email: 'required|email',
+        });
+
+        const isValid = await validator.check();
+
+        if (!isValid) return res.status(400).send(nodeInputValidatorHelper.formatErrors(validator)) && next();
+
             return Promise.all([
                 userModel.create({
                     email: req.body.email,
-                    password: req.body.password,
                 }),
                 roleModel.findOne({
                     where: {
@@ -158,7 +157,6 @@ module.exports = {
                         .catch(error => res.status(400).send(error));
                 })
                 .catch(error => res.status(400).send(error));
-        }
     },
     async update(req, res) {
         const data = qs.parse(req.body);
@@ -195,10 +193,11 @@ module.exports = {
                     as: 'roles'
                 }, {
                     model: companyModel,
-                    as: 'companies'
+                    as: 'companies',
+                    attributes: ['id'],
                 }]
             })
-            .then(user => {
+            .then(async user => {
                 if (!user) return res.status(404).send({
                     name: 'Not found',
                     errors: [{
@@ -206,18 +205,32 @@ module.exports = {
                     }]
                 });
 
+                const dataCompanies = _map(data.companies, company => parseInt(company));
+                const userCompanies = _map(user.companies, company => parseInt(company.userCompany.dataValues.companyId));
+
+                const addList = _filter(dataCompanies, company => !_includes(userCompanies, company));
+                const toAdd = _map(addList, companyId => userCompanyModel.create({
+                    userId: user.id,
+                    companyId: companyId
+                }).catch(error => res.status(400).send(error)));
+
+                const deleteObjects = _filter(user.companies, company => !_includes(dataCompanies, parseInt(company.userCompany.dataValues.companyId)));
+                const toDelete = _map(deleteObjects, company => company.userCompany.destroy());
+
                 const calls = [
                     user.update({
                         email: data.email,
                         password: data.password,
                     }).catch(error => res.status(400).send(error)),
-                    upCreateHelper(profileModel, user.profile, {
+                    updateCreateHelper(profileModel, user.profile, {
                         userId: user.id,
                         firstName: data.profile.firstName,
                         lastName: data.profile.lastName,
                         sex: data.profile.sex,
                         birthDate: data.profile.birthDate,
-                    }).catch(error => res.status(400).send(error))
+                    }).catch(error => res.status(400).send(error)),
+                    ...toAdd,
+                    ...toDelete
                 ];
 
                 return Promise.all(calls).then(() => {
